@@ -1,2 +1,6 @@
 data/
 .vscode
+.pth.tar
+
+__pycache__
+artifacts/
