@@ -155,7 +155,7 @@ def create_timestamp_folder(model_name):
     """
     current_time = time.localtime()
     folder_name = time.strftime('%Y-%m-%d-%H-%M-%S', current_time)
-    return f'{model_name}-{folder_name}'
+    return f'{model_name}_{folder_name}'
 
 
 def initialize_wandb(inputs):

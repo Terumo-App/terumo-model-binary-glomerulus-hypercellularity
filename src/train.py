@@ -23,10 +23,9 @@ torch.backends.cudnn.benchmark = True
 def main():
 
     print(f'Device is {config.DEVICE}')
-
     initialize_wandb(config)
-
     artifact_folder = create_timestamp_folder(config.MODEL_NAME)
+
     skfold = StratifiedKFold(n_splits=5, shuffle=True)
     data_loader = ImageDataLoader(config.DATA_DIR)
     binary_labels = [sample[1] for sample in data_loader.dataset.samples]
