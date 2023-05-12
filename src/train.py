@@ -33,7 +33,7 @@ from options import BaseOptions
 # benchmark mode is good whenever your input sizes for your network do not vary. This way, cudnn will look for the optimal set of algorithms for that particular configuration (which takes some time). This usually leads to faster runtime.
 # But if your input sizes changes at each iteration, then cudnn will benchmark every time a new size appears, possibly leading to worse runtime performances.
 torch.backends.cudnn.benchmark = True
-wandb.login(key='')
+wandb.login(key='223d8c4c7c780c00b13e51ec5ffb66cb2cd92d47')
 opt = BaseOptions().parse()
 PARAMS = load_training_parameters(opt.config_file)
 
@@ -48,7 +48,7 @@ def main():
     binary_labels = [sample[1] for sample in data_loader.dataset.samples]
     for fold, (train_ids, test_ids) in enumerate(skfold.split(data_loader.dataset, binary_labels)):
 
-        initialize_wandb(PARAMS, fold, artifact_folder)
+        initialize_wandb(PARAMS, fold+1, artifact_folder)
         train_subset = Subset(data_loader.dataset, train_ids)
         train_subset.transform = get_train_transform()
         sampler = get_balanced_dataset_sampler(data_loader, train_ids, train_subset)
@@ -97,6 +97,7 @@ def main():
                 'train_accuracy': train_acc,
                 'val_loss': test_loss,
                 'val_acc': test_acc,
+                'val_fscore': metrics.fscore*100,
                 })
 
             if max_val_accuracy < test_acc:
@@ -111,7 +112,7 @@ def main():
         if PARAMS['wandb_on']:
             _, _, metrics = valid_epoch(val_loader, model, loss_fn, config.DEVICE)
             wandb_log_final_result(metrics, PARAMS)
-
+            wandb.finish()
 
 
 

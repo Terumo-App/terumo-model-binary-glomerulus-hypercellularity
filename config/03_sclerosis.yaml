@@ -1,0 +1,46 @@
+
+project: 'model-binary-glomerulus-sclerosis'
+n_folds: 5
+seed: 42
+num_workers: 0
+batch_size: 128
+pin_memory: True
+load_model: False
+checkpoint_to_be_loaded: './artifacts/model/my_checkpoint.pth.tar'
+learning_rate: 0.0001
+num_epochs: 15
+wandb_on: True
+model_name: 'sclero_others'
+data_dir: './data/binary/sclero_others/'
+classes: ['sclerosis', 'others']
+data_folders:
+  - '..\data\binary\sclero_others\others'
+  - '..\data\binary\sclero_others\_sclerosis'
+  - '..\data\binary\sclero_others\others\hipercellularity'
+  - '..\data\binary\sclero_others\others\membranous'
+  - '..\data\binary\sclero_others\others\normal'
+  - '..\data\binary\sclero_others\others\hipercellularity\AZAN'
+  - '..\data\binary\sclero_others\others\hipercellularity\HE'
+  - '..\data\binary\sclero_others\others\hipercellularity\PAS'
+  - '..\data\binary\sclero_others\others\hipercellularity\PS'
+  - '..\data\binary\sclero_others\others\membranous\primary_membranous'
+  - '..\data\binary\sclero_others\others\membranous\primary_membranous\AZAN'
+  - '..\data\binary\sclero_others\others\membranous\primary_membranous\HE'
+  - '..\data\binary\sclero_others\others\membranous\primary_membranous\PAMS'
+  - '..\data\binary\sclero_others\others\membranous\primary_membranous\PAS'
+  - '..\data\binary\sclero_others\others\membranous\primary_membranous\PICRO'
+  - '..\data\binary\sclero_others\others\normal\AZAN'
+  - '..\data\binary\sclero_others\others\normal\HE'
+  - '..\data\binary\sclero_others\others\normal\PAMS'
+  - '..\data\binary\sclero_others\others\normal\PAS'
+  - '..\data\binary\sclero_others\others\normal\PICRO'
+  - '..\data\binary\sclero_others\_sclerosis\sclerosis'
+  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb'
+  - '..\data\binary\sclero_others\_sclerosis\sclerosis\HE'
+  - '..\data\binary\sclero_others\_sclerosis\sclerosis\PAMS'
+  - '..\data\binary\sclero_others\_sclerosis\sclerosis\PAS'
+  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb\AZAN'
+  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb\HE'
+  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb\PAMS'
+  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb\PAS'
+  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb\PS'

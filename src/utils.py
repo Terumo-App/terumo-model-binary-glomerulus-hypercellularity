@@ -231,8 +231,9 @@ def measure_execution_time(func):
     func()  # Execute the function
     end_time = time.time()
     elapsed_time = end_time - start_time
+    elapsed_time_min =  elapsed_time / 60
 
-    print("Training elapsed Time:", elapsed_time, "seconds")
+    print(f"Training elapsed Time: {elapsed_time_min:.3f} minutes")
     
 
 
@@ -247,16 +248,21 @@ def wandb_log_final_result(metrics:Metrics, config):
                             y_true=metrics.y_true, preds=metrics.y_pred,
                             class_names=config['classes'])})
     
-    wandb.log({"pr" : wandb.plot.pr_curve(metrics.y_true, metrics.y_pred,
-                labels=None, classes_to_plot=config['classes'])})
+    # wandb.log({"pr" : wandb.plot.pr_curve(metrics.y_true, metrics.y_pred,
+    #             labels=None, classes_to_plot=None)})
 
-    wandb.log({"ROC" : wandb.plot.roc_curve(metrics.y_true, metrics.y_pred,
-                            labels=config['classes'])})
+    # wandb.log({"ROC" : wandb.plot.roc_curve(metrics.y_true, metrics.y_pred,
+    #                         labels=config['classes'])})
 
-    wandb.log({
-        'final_accuracy': metrics.accuracy,
-        'final_precision': metrics.precision,
-        'final_recall': metrics.recall,
-        'final_fscore': metrics.fscore,
-        'final_kappa': metrics.kappa           
-        })    
+    wandb.summary['test_accuracy'] = metrics.accuracy
+    wandb.summary['test_precision'] = metrics.precision
+    wandb.summary['test_recall'] = metrics.recall
+    wandb.summary['test_fscore'] = metrics.fscore
+    wandb.summary['test_kappa'] = metrics.kappa
+    # wandb.log({
+    #     'final_accuracy': metrics.accuracy,
+    #     'final_precision': metrics.precision,
+    #     'final_recall': metrics.recall,
+    #     'final_fscore': metrics.fscore,
+    #     'final_kappa': metrics.kappa           
+    #     })    

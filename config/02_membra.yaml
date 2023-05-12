@@ -1,0 +1,42 @@
+
+project: 'model-binary-glomerulus-membranous'
+n_folds: 5
+seed: 42
+num_workers: 0
+batch_size: 128
+pin_memory: True
+load_model: False
+checkpoint_to_be_loaded: './artifacts/model/my_checkpoint.pth.tar'
+learning_rate: 0.0001
+num_epochs: 15
+wandb_on: True
+model_name: 'membran_others'
+data_dir: './data/binary/membran_others/'
+classes: ['membranous', 'others']
+data_folders:
+  - '..\data\binary\membran_others\membranous'
+  - '..\data\binary\membran_others\others'
+  - '..\data\binary\membran_others\membranous\primary_membranous'
+  - '..\data\binary\membran_others\membranous\primary_membranous\AZAN'
+  - '..\data\binary\membran_others\membranous\primary_membranous\HE'
+  - '..\data\binary\membran_others\membranous\primary_membranous\PAMS'
+  - '..\data\binary\membran_others\membranous\primary_membranous\PAS'
+  - '..\data\binary\membran_others\membranous\primary_membranous\PICRO'
+  - '..\data\binary\membran_others\others\hipercellularity'
+  - '..\data\binary\membran_others\others\normal'
+  - '..\data\binary\membran_others\others\sclerosis'
+  - '..\data\binary\membran_others\others\hipercellularity\AZAN'
+  - '..\data\binary\membran_others\others\hipercellularity\HE'
+  - '..\data\binary\membran_others\others\hipercellularity\PAS'
+  - '..\data\binary\membran_others\others\hipercellularity\PS'
+  - '..\data\binary\membran_others\others\normal\AZAN'
+  - '..\data\binary\membran_others\others\normal\HE'
+  - '..\data\binary\membran_others\others\normal\PAMS'
+  - '..\data\binary\membran_others\others\normal\PAS'
+  - '..\data\binary\membran_others\others\normal\PICRO'
+  - '..\data\binary\membran_others\others\sclerosis\sclerosis_withoutMemb'
+  - '..\data\binary\membran_others\others\sclerosis\sclerosis_withoutMemb\AZAN'
+  - '..\data\binary\membran_others\others\sclerosis\sclerosis_withoutMemb\HE'
+  - '..\data\binary\membran_others\others\sclerosis\sclerosis_withoutMemb\PAMS'
+  - '..\data\binary\membran_others\others\sclerosis\sclerosis_withoutMemb\PAS'
+  - '..\data\binary\membran_others\others\sclerosis\sclerosis_withoutMemb\PS'
