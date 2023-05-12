@@ -14,6 +14,8 @@ import torch.nn.functional as F
 import time
 from pathlib import Path
 from torch import nn
+import yaml
+from metrics import Metrics
 
 def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
     model.train()
@@ -53,6 +55,8 @@ def valid_epoch(loader, model, loss_fn , device="cuda"):
     valid_loss = 0.0
     f1_running = 0.0
     model.eval()
+    y_true = []
+    y_pred = []
 
     with torch.no_grad():
         for x, y in loader:
@@ -71,11 +75,16 @@ def valid_epoch(loader, model, loss_fn , device="cuda"):
 
             num_correct += (pred == y).sum()
             num_samples += predictions.shape[0]
+            y_true.extend(y.tolist())
+            y_pred.extend(pred.tolist())
 
-            f1_score, precision, recall = compute_metrics(y,pred)
-            f1_running +=f1_score
+            # f1_score, precision, recall = compute_metrics(y,pred)
+            # f1_running +=f1_score
 
-        return valid_loss, num_correct, f1_running
+    metrics_result = Metrics()
+    metrics_result.compute_metrics(y_true, y_pred)
+    
+    return valid_loss, num_correct, metrics_result
           
 
 
@@ -158,10 +167,14 @@ def create_timestamp_folder(model_name):
     return f'{model_name}_{folder_name}'
 
 
-def initialize_wandb(inputs):
-    if inputs.WANDB_ON:
-        wandb.init(name=inputs.name, project=inputs.PROJECT, entity=inputs.ENTITY)
-        wandb.config = inputs.wandb
+def initialize_wandb(inputs, fold, folder_name):
+    if inputs['wandb_on']:
+        wandb.init(
+            name=f'{folder_name}_{fold}', 
+            project=inputs['project'],
+            config=inputs
+            )
+
 
 
 def set_gpu_mode(model):
@@ -221,3 +234,29 @@ def measure_execution_time(func):
 
     print("Training elapsed Time:", elapsed_time, "seconds")
     
+
+
+def load_training_parameters(filename):
+    with open(filename, 'r') as file:
+        params = yaml.safe_load(file)
+    return params
+
+def wandb_log_final_result(metrics:Metrics, config):
+
+    wandb.log({"conf_mat" : wandb.plot.confusion_matrix(probs=None,
+                            y_true=metrics.y_true, preds=metrics.y_pred,
+                            class_names=config['classes'])})
+    
+    wandb.log({"pr" : wandb.plot.pr_curve(metrics.y_true, metrics.y_pred,
+                labels=None, classes_to_plot=config['classes'])})
+
+    wandb.log({"ROC" : wandb.plot.roc_curve(metrics.y_true, metrics.y_pred,
+                            labels=config['classes'])})
+
+    wandb.log({
+        'final_accuracy': metrics.accuracy,
+        'final_precision': metrics.precision,
+        'final_recall': metrics.recall,
+        'final_fscore': metrics.fscore,
+        'final_kappa': metrics.kappa           
+        })    

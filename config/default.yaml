@@ -1,0 +1,15 @@
+
+project: 'model-binary-glomerulus-hypercellularity'
+
+seed: 42
+num_workers: 0
+batch_size: 128
+pin_memory: True
+load_model: False
+checkpoint_to_be_loaded: './artifacts/model/my_checkpoint.pth.tar'
+learning_rate: 1e-4
+num_epochs: 100
+wandb_on: False
+model_name: 'hiper_normal'
+data_dir: './data/binary/hiper_normal/'
+classes: ['hipercelularity', 'others']
