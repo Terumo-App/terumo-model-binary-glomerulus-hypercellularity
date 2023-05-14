@@ -1,7 +1,14 @@
-data/
+data/binary
+data/raw
+data/results
+data/test
 .vscode
 .pth.tar
 
 __pycache__
 artifacts/
 wandb/
+
+*.egg-info
+
+*.zip

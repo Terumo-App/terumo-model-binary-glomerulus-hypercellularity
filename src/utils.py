@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 from torch import nn
 import yaml
-from metrics import Metrics
+from src.metrics import Metrics
 
 def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
     model.train()
@@ -49,11 +49,9 @@ def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
 
     return train_loss, train_correct
 
-def valid_epoch(loader, model, loss_fn , device="cuda"):
+def valid_epoch(loader, model, loss_fn=None, device="cuda"):
     num_correct = 0
-    num_samples = 0
     valid_loss = 0.0
-    f1_running = 0.0
     model.eval()
     y_true = []
     y_pred = []
@@ -68,18 +66,18 @@ def valid_epoch(loader, model, loss_fn , device="cuda"):
             predictions = (scores>0.5).float()
             
             target = F.one_hot(y, num_classes=2)
-            loss = loss_fn(output, target.float())
-            valid_loss+=loss.item()*x.size(0)
+
+            if loss_fn:
+                loss = loss_fn(output, target.float())
+                valid_loss+=loss.item()*x.size(0)
 
             _, pred = torch.max(predictions, 1)
 
             num_correct += (pred == y).sum()
-            num_samples += predictions.shape[0]
+
             y_true.extend(y.tolist())
             y_pred.extend(pred.tolist())
 
-            # f1_score, precision, recall = compute_metrics(y,pred)
-            # f1_running +=f1_score
 
     metrics_result = Metrics()
     metrics_result.compute_metrics(y_true, y_pred)
@@ -99,8 +97,9 @@ def save_checkpoint(model, optimizer, create_timestamp_folder, metric_type, fold
 
 
 
-def load_checkpoint(checkpoint, model, optimizer):
+def load_checkpoint(path, model, optimizer):
     print("=> Loading checkpoint")
+    checkpoint = torch.load(path)
     model.load_state_dict(checkpoint['state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer'])
 
