@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 from torch import nn
 import yaml
-from src.metrics import Metrics
+from metrics import Metrics
 
 def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
     model.train()
