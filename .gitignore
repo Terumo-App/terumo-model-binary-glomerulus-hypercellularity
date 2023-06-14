@@ -12,3 +12,7 @@ wandb/
 *.egg-info
 
 *.zip
+
+
+notebooks/*.jpg
+*.jpg
