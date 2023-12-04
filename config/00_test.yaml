@@ -10,9 +10,9 @@ learning_rate: 0.0001
 num_epochs: 5
 wandb_on: True
 wandb_key: '273b6e50d83b95fd3a12d6544e5d48bf5afa49e2'
-model_name: 'debugging'
-data_dir: './data/raw/Hypercelularidade/'
-classes: ['Hypercelularidade', 'others']
+model_name: 'Hypercelularidade'
+data_dir: './data/binary/binary_Hypercelularidade'
+classes: ['_others', 'Hypercelularidade']
 data_folders:
   - '..\data\binary\hiper_others\hipercellularity'
   - '..\data\binary\hiper_others\others'

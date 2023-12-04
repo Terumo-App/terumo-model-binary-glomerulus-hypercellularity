@@ -11,9 +11,9 @@ learning_rate: 0.0001
 num_epochs: 80
 wandb_on: True
 wandb_key: '273b6e50d83b95fd3a12d6544e5d48bf5afa49e2'
-model_name: 'podocytopathy'
-data_dir: './data/processed/podocytopathy'
-classes: ['podocytopathy', 'others']
+model_name: 'Podocitopatia'
+data_dir: './data/binary/binary_Podocitopatia'
+classes: ['_others', 'Podocitopatia']
 data_folders:
   - '..\data\binary\podocytopathy\others'
   - '..\data\binary\podocytopathy\_podocitopatia'
