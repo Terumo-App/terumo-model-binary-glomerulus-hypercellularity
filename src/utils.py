@@ -22,7 +22,7 @@ def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
     train_loss = 0.0
     train_correct = 0
 
-    for batch_idx, (data, y) in enumerate(loader):
+    for batch_idx, (data, y) in tqdm(enumerate(loader), total=len(loader)):
         data = data.to(device=device)
         y = y.to(device=device)
         targets = F.one_hot(y, num_classes=2)
@@ -57,7 +57,7 @@ def valid_epoch(loader, model, loss_fn=None, device="cuda"):
     y_pred = []
 
     with torch.no_grad():
-        for x, y in loader:
+        for x, y in tqdm(loader, total=len(loader)):
             x = x.to(device=device)
             y = y.to(device=device)
   
@@ -89,6 +89,8 @@ def valid_epoch(loader, model, loss_fn=None, device="cuda"):
     
 
 def save_checkpoint(model, optimizer, create_timestamp_folder, metric_type, fold=""):
+    if not os.path.exists('./artifacts'):
+        os.mkdir('./artifacts')
     state = {'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}
     Path(f'./artifacts/{create_timestamp_folder}').mkdir(exist_ok=True)
     filename=f"./artifacts/{create_timestamp_folder}/{fold}_fold_{metric_type}_checkpoint.pth.tar"

@@ -1,18 +1,18 @@
-
 project: 'model-binary-glomerulus-hypercellularity'
 n_folds: 5
 seed: 42
 num_workers: 0
-batch_size: 128
+batch_size: 64
 pin_memory: True
 load_model: False
 checkpoint_to_be_loaded: './artifacts/model/my_checkpoint.pth.tar'
 learning_rate: 0.0001
-num_epochs: 20
+num_epochs: 5
 wandb_on: True
-model_name: 'hiper_normal_reduced'
-data_dir: './data/binary/hiper_normal_reduced/'
-classes: ['hipercelularity', 'normal']
+wandb_key: '273b6e50d83b95fd3a12d6544e5d48bf5afa49e2'
+model_name: 'debugging'
+data_dir: './data/raw/Hypercelularidade/'
+classes: ['Hypercelularidade', 'others']
 data_folders:
   - '..\data\binary\hiper_others\hipercellularity'
   - '..\data\binary\hiper_others\others'

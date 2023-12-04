@@ -1,46 +1,46 @@
-
 project: 'model-binary-glomerulus-sclerosis'
 n_folds: 5
 seed: 42
-num_workers: 0
-batch_size: 128
+num_workers: 4
+batch_size: 64
 pin_memory: True
 load_model: False
 checkpoint_to_be_loaded: './artifacts/model/my_checkpoint.pth.tar'
 learning_rate: 0.0001
-num_epochs: 15
+num_epochs: 80
 wandb_on: True
-model_name: 'sclero_others'
-data_dir: './data/binary/sclero_others/'
+wandb_key: '273b6e50d83b95fd3a12d6544e5d48bf5afa49e2'
+model_name: 'sclerosis'
+data_dir: './data/processed/sclerosis/'
 classes: ['sclerosis', 'others']
 data_folders:
-  - '..\data\binary\sclero_others\others'
-  - '..\data\binary\sclero_others\_sclerosis'
-  - '..\data\binary\sclero_others\others\hipercellularity'
-  - '..\data\binary\sclero_others\others\membranous'
-  - '..\data\binary\sclero_others\others\normal'
-  - '..\data\binary\sclero_others\others\hipercellularity\AZAN'
-  - '..\data\binary\sclero_others\others\hipercellularity\HE'
-  - '..\data\binary\sclero_others\others\hipercellularity\PAS'
-  - '..\data\binary\sclero_others\others\hipercellularity\PS'
-  - '..\data\binary\sclero_others\others\membranous\primary_membranous'
-  - '..\data\binary\sclero_others\others\membranous\primary_membranous\AZAN'
-  - '..\data\binary\sclero_others\others\membranous\primary_membranous\HE'
-  - '..\data\binary\sclero_others\others\membranous\primary_membranous\PAMS'
-  - '..\data\binary\sclero_others\others\membranous\primary_membranous\PAS'
-  - '..\data\binary\sclero_others\others\membranous\primary_membranous\PICRO'
-  - '..\data\binary\sclero_others\others\normal\AZAN'
-  - '..\data\binary\sclero_others\others\normal\HE'
-  - '..\data\binary\sclero_others\others\normal\PAMS'
-  - '..\data\binary\sclero_others\others\normal\PAS'
-  - '..\data\binary\sclero_others\others\normal\PICRO'
-  - '..\data\binary\sclero_others\_sclerosis\sclerosis'
-  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb'
-  - '..\data\binary\sclero_others\_sclerosis\sclerosis\HE'
-  - '..\data\binary\sclero_others\_sclerosis\sclerosis\PAMS'
-  - '..\data\binary\sclero_others\_sclerosis\sclerosis\PAS'
-  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb\AZAN'
-  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb\HE'
-  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb\PAMS'
-  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb\PAS'
-  - '..\data\binary\sclero_others\_sclerosis\sclerosis_withoutMemb\PS'
+  - '..\data\binary\sclerosis\others'
+  - '..\data\binary\sclerosis\_sclerosis'
+  - '..\data\binary\sclerosis\others\hipercellularity'
+  - '..\data\binary\sclerosis\others\membranous'
+  - '..\data\binary\sclerosis\others\normal'
+  - '..\data\binary\sclerosis\others\hipercellularity\AZAN'
+  - '..\data\binary\sclerosis\others\hipercellularity\HE'
+  - '..\data\binary\sclerosis\others\hipercellularity\PAS'
+  - '..\data\binary\sclerosis\others\hipercellularity\PS'
+  - '..\data\binary\sclerosis\others\membranous\primary_membranous'
+  - '..\data\binary\sclerosis\others\membranous\primary_membranous\AZAN'
+  - '..\data\binary\sclerosis\others\membranous\primary_membranous\HE'
+  - '..\data\binary\sclerosis\others\membranous\primary_membranous\PAMS'
+  - '..\data\binary\sclerosis\others\membranous\primary_membranous\PAS'
+  - '..\data\binary\sclerosis\others\membranous\primary_membranous\PICRO'
+  - '..\data\binary\sclerosis\others\normal\AZAN'
+  - '..\data\binary\sclerosis\others\normal\HE'
+  - '..\data\binary\sclerosis\others\normal\PAMS'
+  - '..\data\binary\sclerosis\others\normal\PAS'
+  - '..\data\binary\sclerosis\others\normal\PICRO'
+  - '..\data\binary\sclerosis\_sclerosis\sclerosis'
+  - '..\data\binary\sclerosis\_sclerosis\sclerosis_withoutMemb'
+  - '..\data\binary\sclerosis\_sclerosis\sclerosis\HE'
+  - '..\data\binary\sclerosis\_sclerosis\sclerosis\PAMS'
+  - '..\data\binary\sclerosis\_sclerosis\sclerosis\PAS'
+  - '..\data\binary\sclerosis\_sclerosis\sclerosis_withoutMemb\AZAN'
+  - '..\data\binary\sclerosis\_sclerosis\sclerosis_withoutMemb\HE'
+  - '..\data\binary\sclerosis\_sclerosis\sclerosis_withoutMemb\PAMS'
+  - '..\data\binary\sclerosis\_sclerosis\sclerosis_withoutMemb\PAS'
+  - '..\data\binary\sclerosis\_sclerosis\sclerosis_withoutMemb\PS'

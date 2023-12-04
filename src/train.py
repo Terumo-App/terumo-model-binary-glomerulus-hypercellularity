@@ -33,9 +33,9 @@ from options import BaseOptions
 # benchmark mode is good whenever your input sizes for your network do not vary. This way, cudnn will look for the optimal set of algorithms for that particular configuration (which takes some time). This usually leads to faster runtime.
 # But if your input sizes changes at each iteration, then cudnn will benchmark every time a new size appears, possibly leading to worse runtime performances.
 torch.backends.cudnn.benchmark = True
-wandb.login(key='223d8c4c7c780c00b13e51ec5ffb66cb2cd92d47')
 opt = BaseOptions().parse()
 PARAMS = load_training_parameters(opt.config_file)
+wandb.login(key=PARAMS['wandb_key'])
 
 def main():
 
