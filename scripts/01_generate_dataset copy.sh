@@ -1,1 +1,1 @@
-python ./data/01_generate_dataset.py
+python data-processing/01_generate_dataset.py
