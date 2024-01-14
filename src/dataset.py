@@ -1,13 +1,14 @@
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
+from config import settings
 
 class ImageDataLoader:
     def __init__(self, data_dir):
         self.data_dir = data_dir
         self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize(settings.img_size),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+            transforms.Normalize(mean=settings.mean, std=settings.std)
         ])
         self.dataset = ImageFolder(self.data_dir, transform=self.transform, target_transform=self._get_class_name)
      

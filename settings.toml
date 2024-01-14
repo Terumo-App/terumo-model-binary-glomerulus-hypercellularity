@@ -4,3 +4,16 @@ class_names = ['Hypercellularity', 'Normal', 'Membranous', 'Sclerosis', 'Crescen
 data_folder = "./data"
 allowed_img_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff']
 raw_data_folder = "raw"
+img_size = [224, 224]
+mean = [0.5, 0.5, 0.5]
+std = [0.5, 0.5, 0.5]
+device = "cuda"
+
+maxRotationAngle = 10
+cropSize = 224
+brightnessFactor = 0.4
+contrastFactor = 0.4
+saturationFactor = 0.4
+hueFactor = 0.1
+
+fcLayer = 1280

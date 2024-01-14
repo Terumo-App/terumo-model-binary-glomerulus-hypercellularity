@@ -3,8 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from model import Net
-from utils import (
+from src.model import Net
+from src.utils import (
      valid_epoch, 
      load_checkpoint, 
      save_checkpoint, 
@@ -21,13 +21,13 @@ from utils import (
      wandb_log_final_result
 )
 import sys
-import config
-from dataset import ImageDataLoader
+from config import settings
+from src.dataset import ImageDataLoader
 from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import DataLoader, Subset
 import torch.nn.functional as F
 import wandb
-from options import BaseOptions
+from src.options import BaseOptions
 
 # This flag allows you to enable the inbuilt cudnn auto-tuner to find the best algorithm to use for your hardware.
 # benchmark mode is good whenever your input sizes for your network do not vary. This way, cudnn will look for the optimal set of algorithms for that particular configuration (which takes some time). This usually leads to faster runtime.
@@ -38,8 +38,10 @@ PARAMS = load_training_parameters(opt.config_file)
 wandb.login(key=PARAMS['wandb_key'])
 
 def main():
+    if settings.DEVICE == 'cuda' and not torch.cuda.is_available():
+        raise ValueError("DEVICE is set to cuda but cuda is not available")
 
-    print(f'Device is {config.DEVICE}')
+    print(f'Device is {settings.DEVICE}')
     
     artifact_folder = create_timestamp_folder(PARAMS['model_name'])
 
@@ -62,7 +64,7 @@ def main():
         print(f'Fold  {fold +1}')
 
         loss_fn = nn.CrossEntropyLoss()
-        model = Net(net_version="b0", num_classes=2).to(config.DEVICE)
+        model = Net(net_version="b0", num_classes=2).to(settings.DEVICE)
         optimizer = optim.Adam(model.parameters(), lr=PARAMS['learning_rate'])
         scaler = torch.cuda.amp.GradScaler()
         set_gpu_mode(model)
@@ -70,15 +72,15 @@ def main():
         if PARAMS['load_model']:
             load_checkpoint(torch.load(PARAMS['checkpoint_to_be_loaded']), model, optimizer)
 
-        # valid_epoch(val_loader, model, loss_fn, config.DEVICE)
+        # valid_epoch(val_loader, model, loss_fn, settings.DEVICE)
         
         max_val_accuracy, min_val_loss = 0, sys.maxsize
         for epoch in range(PARAMS['num_epochs']):
                    
 
 
-            train_metrics = train_epoch(train_loader, model, optimizer, loss_fn, scaler, config.DEVICE)
-            test_metrics = valid_epoch(val_loader, model, loss_fn, config.DEVICE)
+            train_metrics = train_epoch(train_loader, model, optimizer, loss_fn, scaler, settings.DEVICE)
+            test_metrics = valid_epoch(val_loader, model, loss_fn, settings.DEVICE)
 
             train_loss, train_correct = train_metrics
             test_loss, test_correct, metrics = test_metrics
@@ -110,7 +112,7 @@ def main():
         
 
         if PARAMS['wandb_on']:
-            _, _, metrics = valid_epoch(val_loader, model, loss_fn, config.DEVICE)
+            _, _, metrics = valid_epoch(val_loader, model, loss_fn, settings.DEVICE)
             wandb_log_final_result(metrics, PARAMS)
             wandb.finish()
 

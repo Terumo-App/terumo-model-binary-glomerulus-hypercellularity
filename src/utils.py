@@ -15,7 +15,8 @@ import time
 from pathlib import Path
 from torch import nn
 import yaml
-from metrics import Metrics
+from src.metrics import Metrics
+from config import settings
 
 def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
     model.train()
@@ -140,19 +141,22 @@ def get_balanced_dataset_sampler(data_loader, train_ids, train_subset):
 def get_train_transform():
     return transforms.Compose([
         transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(10),
-        transforms.RandomResizedCrop(224),
+        transforms.RandomRotation(settings.maxRotationAngle),
+        transforms.RandomResizedCrop(settings.cropSize),
         transforms.ColorJitter(
-            brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+            brightness=settings.brightnessFactor,
+            contrast=settings.contrastFactor,
+            saturation=settings.saturationFactor,
+            hue=settings.hueFactor),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+        transforms.Normalize(mean=settings.mean, std=settings.std)
     ])
 
 def get_test_transform():
     return transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Resize(settings.img_size),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+        transforms.Normalize(mean=settings.mean, std=settings.std)
     ])
 
 
