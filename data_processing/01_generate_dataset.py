@@ -5,7 +5,7 @@ from typing import List
 import re
 import json
 from tqdm import tqdm
-
+from config import settings
 
 def generate_data_folders(dataset_name: str, new_folder_name: str = 'processed', data_folder: str = './data', raw_data_folder: str = 'raw'):
     """
@@ -27,7 +27,8 @@ def generate_binary_dataset(dataset_name: str,
                             class_list: List[str],
                             target_class: str,
                             new_folder_name: str = 'processed', 
-                            data_folder: str = './data'):
+                            data_folder: str = './data',
+                            raw_data_folder: str = 'raw'):
     def format_path(file_path):
         """
             data/raw/A/[...]/fname -> A/[...]/fname
@@ -37,8 +38,7 @@ def generate_binary_dataset(dataset_name: str,
         return path_suffix
     
     def get_all_image_files(pathlib_root_folder):
-        img_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff']
-        img_regex = re.compile('|'.join(img_extensions), re.IGNORECASE)
+        img_regex = re.compile('|'.join(settings.allowed_img_extensions), re.IGNORECASE)
         image_files = [f for f in pathlib_root_folder.glob('**/*') if f.is_file() and img_regex.search(f.suffix)]
         return image_files
     
@@ -46,7 +46,8 @@ def generate_binary_dataset(dataset_name: str,
     raw_data_dir, dataset_dir = generate_data_folders(
          dataset_name,
          new_folder_name=new_folder_name, 
-         data_folder=data_folder
+         data_folder=data_folder,
+         raw_data_folder=raw_data_folder
          )
 
     print("#"*80)
@@ -75,18 +76,15 @@ def generate_binary_dataset(dataset_name: str,
     with open(f'{str(dataset_dir)}_{cls}_dataset.json', 'w') as f:
         json.dump({"images":f_list}, f)
 
-if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        data_folder = sys.argv[1]
-    else:
-        data_folder = './data'
-    
-    classes_list = ['Hypercelularidade', 'Normal','Membranous', 'Sclerosis', 'Crescent', 'Podocitopatia']
+data_folder = settings.data_folder
+raw_data_folder = settings.raw_data_folder
 
-    for target_cls in classes_list:
-        generate_binary_dataset(
-             dataset_name='binary_' + target_cls, 
-             class_list=classes_list,
-             target_class=target_cls,
-             new_folder_name='binary',
-             data_folder=data_folder)
+class_names = settings.class_names
+
+for target_cls in class_names:
+    generate_binary_dataset(
+            dataset_name='binary_' + target_cls, 
+            class_list=class_names,
+            target_class=target_cls,
+            new_folder_name='binary',
+            data_folder=data_folder)

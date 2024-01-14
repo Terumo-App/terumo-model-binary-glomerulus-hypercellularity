@@ -1,0 +1,6 @@
+[default]
+
+class_names = ['Hypercellularity', 'Normal', 'Membranous', 'Sclerosis', 'Crescent', 'Podocytopathy']
+data_folder = "./data"
+allowed_img_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff']
+raw_data_folder = "raw"
