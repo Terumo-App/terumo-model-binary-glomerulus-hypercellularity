@@ -13,3 +13,5 @@ wandb/
 
 notebooks/*.jpg
 *.jpg
+
+.venv
