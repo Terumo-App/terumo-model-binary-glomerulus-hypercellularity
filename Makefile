@@ -1,5 +1,6 @@
 build_dataset:
-	python -m data_processing.01_generate_dataset
+	bash scripts/00_organize_data_folders.sh
+	bash scripts/01_generate_dataset_copy.sh
 
 train:
 	bash scripts/02_train.sh
