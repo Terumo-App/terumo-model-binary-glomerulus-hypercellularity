@@ -172,7 +172,8 @@ def initialize_wandb(inputs, fold, folder_name):
     if inputs['wandb_on']:
         wandb.init(
             name=f'{folder_name}_{fold}', 
-            project=inputs['project'],
+            project=inputs['wandb_project'],
+            entity=inputs['wandb_team'],
             config=inputs
             )
 

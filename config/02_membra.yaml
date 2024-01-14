@@ -1,4 +1,5 @@
-project: 'membranous'
+wandb_project: 'membranous'
+wandb_team: 'terumo-binary'
 n_folds: 5
 seed: 42
 num_workers: 4

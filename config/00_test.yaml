@@ -1,4 +1,5 @@
-project: 'hypercellularity'
+wandb_project: 'debugging'
+wandb_team: 'terumo-binary'
 n_folds: 5
 seed: 42
 num_workers: 0
