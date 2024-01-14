@@ -1,4 +1,4 @@
-project: 'model-binary-glomerulus-hypercellularity'
+project: 'hypercellularity'
 n_folds: 5
 seed: 42
 num_workers: 4
@@ -11,36 +11,5 @@ num_epochs: 40
 wandb_on: True
 wandb_key: '273b6e50d83b95fd3a12d6544e5d48bf5afa49e2'
 model_name: 'Hypercelularidade'
-data_dir: './data/binary/binary_Hypercelularidade'
-classes: ['_others', 'Hypercelularidade']
-data_folders:
-  - '..\data\processed\hipercellularity\hipercellularity'
-  - '..\data\processed\hipercellularity\others'
-  - '..\data\processed\hipercellularity\hipercellularity\AZAN'
-  - '..\data\processed\hipercellularity\hipercellularity\HE'
-  - '..\data\processed\hipercellularity\hipercellularity\PAS'
-  - '..\data\processed\hipercellularity\hipercellularity\PS'
-  - '..\data\processed\hipercellularity\others\membranous'
-  - '..\data\processed\hipercellularity\others\normal'
-  - '..\data\processed\hipercellularity\others\sclerosis'
-  - '..\data\processed\hipercellularity\others\membranous\primary_membranous'
-  - '..\data\processed\hipercellularity\others\membranous\primary_membranous\AZAN'
-  - '..\data\processed\hipercellularity\others\membranous\primary_membranous\HE'
-  - '..\data\processed\hipercellularity\others\membranous\primary_membranous\PAMS'
-  - '..\data\processed\hipercellularity\others\membranous\primary_membranous\PAS'
-  - '..\data\processed\hipercellularity\others\membranous\primary_membranous\PICRO'
-  - '..\data\processed\hipercellularity\others\normal\AZAN'
-  - '..\data\processed\hipercellularity\others\normal\HE'
-  - '..\data\processed\hipercellularity\others\normal\PAMS'
-  - '..\data\processed\hipercellularity\others\normal\PAS'
-  - '..\data\processed\hipercellularity\others\normal\PICRO'
-  - '..\data\processed\hipercellularity\others\sclerosis\sclerosis'
-  - '..\data\processed\hipercellularity\others\sclerosis\sclerosis_withoutMemb'
-  - '..\data\processed\hipercellularity\others\sclerosis\sclerosis\HE'
-  - '..\data\processed\hipercellularity\others\sclerosis\sclerosis\PAMS'
-  - '..\data\processed\hipercellularity\others\sclerosis\sclerosis\PAS'
-  - '..\data\processed\hipercellularity\others\sclerosis\sclerosis_withoutMemb\AZAN'
-  - '..\data\processed\hipercellularity\others\sclerosis\sclerosis_withoutMemb\HE'
-  - '..\data\processed\hipercellularity\others\sclerosis\sclerosis_withoutMemb\PAMS'
-  - '..\data\processed\hipercellularity\others\sclerosis\sclerosis_withoutMemb\PAS'
-  - '..\data\processed\hipercellularity\others\sclerosis\sclerosis_withoutMemb\PS'
+data_dir: './data/binary/binary_Hypercellularity'
+classes: ['_others', 'Hypercellularity']

@@ -1,4 +1,4 @@
-project: 'model-binary-glomerulus-hypercellularity'
+project: 'hypercellularity'
 n_folds: 5
 seed: 42
 num_workers: 0
@@ -11,36 +11,5 @@ num_epochs: 1
 wandb_on: True
 wandb_key: '273b6e50d83b95fd3a12d6544e5d48bf5afa49e2'
 model_name: 'Hypercelularidade'
-data_dir: './data/binary/binary_Hypercelularidade'
-classes: ['_others', 'Hypercelularidade']
-data_folders:
-  - '..\data\binary\hiper_others\hipercellularity'
-  - '..\data\binary\hiper_others\others'
-  - '..\data\binary\hiper_others\hipercellularity\AZAN'
-  - '..\data\binary\hiper_others\hipercellularity\HE'
-  - '..\data\binary\hiper_others\hipercellularity\PAS'
-  - '..\data\binary\hiper_others\hipercellularity\PS'
-  - '..\data\binary\hiper_others\others\membranous'
-  - '..\data\binary\hiper_others\others\normal'
-  - '..\data\binary\hiper_others\others\sclerosis'
-  - '..\data\binary\hiper_others\others\membranous\primary_membranous'
-  - '..\data\binary\hiper_others\others\membranous\primary_membranous\AZAN'
-  - '..\data\binary\hiper_others\others\membranous\primary_membranous\HE'
-  - '..\data\binary\hiper_others\others\membranous\primary_membranous\PAMS'
-  - '..\data\binary\hiper_others\others\membranous\primary_membranous\PAS'
-  - '..\data\binary\hiper_others\others\membranous\primary_membranous\PICRO'
-  - '..\data\binary\hiper_others\others\normal\AZAN'
-  - '..\data\binary\hiper_others\others\normal\HE'
-  - '..\data\binary\hiper_others\others\normal\PAMS'
-  - '..\data\binary\hiper_others\others\normal\PAS'
-  - '..\data\binary\hiper_others\others\normal\PICRO'
-  - '..\data\binary\hiper_others\others\sclerosis\sclerosis'
-  - '..\data\binary\hiper_others\others\sclerosis\sclerosis_withoutMemb'
-  - '..\data\binary\hiper_others\others\sclerosis\sclerosis\HE'
-  - '..\data\binary\hiper_others\others\sclerosis\sclerosis\PAMS'
-  - '..\data\binary\hiper_others\others\sclerosis\sclerosis\PAS'
-  - '..\data\binary\hiper_others\others\sclerosis\sclerosis_withoutMemb\AZAN'
-  - '..\data\binary\hiper_others\others\sclerosis\sclerosis_withoutMemb\HE'
-  - '..\data\binary\hiper_others\others\sclerosis\sclerosis_withoutMemb\PAMS'
-  - '..\data\binary\hiper_others\others\sclerosis\sclerosis_withoutMemb\PAS'
-  - '..\data\binary\hiper_others\others\sclerosis\sclerosis_withoutMemb\PS'
+data_dir: './data/binary/binary_Hypercellularity'
+classes: ['_others', 'Hypercellularity']
