@@ -9,6 +9,10 @@ class Net(nn.Module):
         self.backbone._fc = nn.Sequential(
             nn.Linear(settings.fcLayer, num_classes),
         )
+        # freeze backbone layers
+        for name, param in self.backbone.named_parameters():
+            if not name.startswith("_fc"):
+                param.requires_grad = False
 
     def forward(self, x):
         return self.backbone(x)

@@ -42,16 +42,15 @@ def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
 
         train_loss += loss.item() * data.size(0)
 
-        scores = torch.sigmoid(output)
-        predictions = (scores>0.5).float()
-        _, pred = torch.max(predictions, 1)
+        scores = torch.softmax(output, dim=-1)
+        pred = torch.argmax(scores, dim=-1)
         
-        train_correct += (pred == y ).sum()
+        train_correct += (pred == y).sum().item()
 
     return train_loss, train_correct
 
 def valid_epoch(loader, model, loss_fn=None, device="cuda"):
-    num_correct = 0
+    val_correct = 0
     valid_loss = 0.0
     model.eval()
     y_true = []
@@ -63,8 +62,8 @@ def valid_epoch(loader, model, loss_fn=None, device="cuda"):
             y = y.to(device=device)
   
             output = model(x)
-            scores = torch.sigmoid(output)
-            predictions = (scores>0.5).float()
+            scores = torch.softmax(output, dim=-1)
+            pred = torch.argmax(scores, dim=-1)
             
             target = F.one_hot(y, num_classes=2)
 
@@ -72,9 +71,7 @@ def valid_epoch(loader, model, loss_fn=None, device="cuda"):
                 loss = loss_fn(output, target.float())
                 valid_loss+=loss.item()*x.size(0)
 
-            _, pred = torch.max(predictions, 1)
-
-            num_correct += (pred == y).sum()
+            val_correct += (pred == y).sum().item()
 
             y_true.extend(y.tolist())
             y_pred.extend(pred.tolist())
@@ -83,7 +80,7 @@ def valid_epoch(loader, model, loss_fn=None, device="cuda"):
     metrics_result = Metrics()
     metrics_result.compute_metrics(y_true, y_pred)
     
-    return valid_loss, num_correct, metrics_result
+    return valid_loss, val_correct, metrics_result
           
 
 
