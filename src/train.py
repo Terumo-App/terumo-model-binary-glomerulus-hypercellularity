@@ -64,7 +64,7 @@ def main():
         print(f'Fold  {fold +1}')
 
         loss_fn = nn.CrossEntropyLoss()
-        model = Net(net_version="b0", num_classes=2).to(settings.DEVICE)
+        model = Net(net_version="b0", num_classes=2, freeze=PARAMS["freeze"]).to(settings.DEVICE)
         optimizer = optim.Adam(model.parameters(), lr=PARAMS['learning_rate'])
         scaler = torch.cuda.amp.GradScaler()
         set_gpu_mode(model)
