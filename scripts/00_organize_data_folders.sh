@@ -4,7 +4,7 @@
 # (with class names fixed)
 
 classes=("Normal" "Crescent" "Hypercelularidade" "Podocitopatia" "Sclerosis" "Membranous")
-target_classes=("Normal" "Crescent" "Hypercellularity" "Podocitopathy" "Sclerosis" "Membranous")
+target_classes=("Normal" "Crescent" "Hypercellularity" "Podocytopathy" "Sclerosis" "Membranous")
 colorings=( "AZAN" "HE" "PAMS" "PAS" "PICRO" )
 
 for ((i=0;i<${#classes[@]};++i)); do
