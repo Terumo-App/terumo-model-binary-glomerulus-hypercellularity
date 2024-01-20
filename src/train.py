@@ -9,10 +9,8 @@ from src.utils import (
      load_checkpoint, 
      save_checkpoint, 
      make_prediction, 
-     get_balanced_dataset_sampler, 
-     get_train_transform, 
-     get_test_transform, 
-     train_epoch, 
+     get_balanced_dataset_sampler,
+     train_epoch,
      create_timestamp_folder, 
      initialize_wandb, 
      set_gpu_mode, 
@@ -20,6 +18,7 @@ from src.utils import (
      load_training_parameters,
      wandb_log_final_result
 )
+from src.transforms import get_train_transform, get_test_transform
 import sys
 from config import settings
 from src.dataset import ImageDataLoader
@@ -38,10 +37,10 @@ PARAMS = load_training_parameters(opt.config_file)
 wandb.login(key=PARAMS['wandb_key'])
 
 def main():
-    if settings.DEVICE == 'cuda' and not torch.cuda.is_available():
+    if settings.config.DEVICE == 'cuda' and not torch.cuda.is_available():
         raise ValueError("DEVICE is set to cuda but cuda is not available")
 
-    print(f'Device is {settings.DEVICE}')
+    print(f'Device is {settings.config.DEVICE}')
     
     artifact_folder = create_timestamp_folder(PARAMS['model_name'])
 
@@ -64,7 +63,7 @@ def main():
         print(f'Fold  {fold +1}')
 
         loss_fn = nn.CrossEntropyLoss()
-        model = Net(net_version="b0", num_classes=2, freeze=PARAMS["freeze"]).to(settings.DEVICE)
+        model = Net(net_version="b0", num_classes=2, freeze=PARAMS["freeze"]).to(settings.config.DEVICE)
         optimizer = optim.Adam(model.parameters(), lr=PARAMS['learning_rate'])
         scaler = torch.cuda.amp.GradScaler()
         set_gpu_mode(model)
@@ -72,15 +71,15 @@ def main():
         if PARAMS['load_model']:
             load_checkpoint(torch.load(PARAMS['checkpoint_to_be_loaded']), model, optimizer)
 
-        # valid_epoch(val_loader, model, loss_fn, settings.DEVICE)
+        # valid_epoch(val_loader, model, loss_fn, settings.config.DEVICE)
         
         max_val_accuracy, min_val_loss = 0, sys.maxsize
         for epoch in range(PARAMS['num_epochs']):
                    
 
 
-            train_metrics = train_epoch(train_loader, model, optimizer, loss_fn, scaler, settings.DEVICE)
-            test_metrics = valid_epoch(val_loader, model, loss_fn, settings.DEVICE)
+            train_metrics = train_epoch(train_loader, model, optimizer, loss_fn, scaler, settings.config.DEVICE)
+            test_metrics = valid_epoch(val_loader, model, loss_fn, settings.config.DEVICE)
 
             train_loss, train_correct = train_metrics
             test_loss, test_correct, metrics = test_metrics
@@ -112,7 +111,7 @@ def main():
         
 
         if PARAMS['wandb_on']:
-            _, _, metrics = valid_epoch(val_loader, model, loss_fn, settings.DEVICE)
+            _, _, metrics = valid_epoch(val_loader, model, loss_fn, settings.config.DEVICE)
             wandb_log_final_result(metrics, PARAMS)
             wandb.finish()
 

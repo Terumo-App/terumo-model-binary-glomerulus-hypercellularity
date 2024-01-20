@@ -38,7 +38,7 @@ def generate_binary_dataset(dataset_name: str,
         return path_suffix
     
     def get_all_image_files(pathlib_root_folder):
-        img_regex = re.compile('|'.join(settings.allowed_img_extensions), re.IGNORECASE)
+        img_regex = re.compile('|'.join(settings.data_processing.allowed_img_extensions), re.IGNORECASE)
         image_files = [f for f in pathlib_root_folder.glob('**/*') if f.is_file() and img_regex.search(f.suffix)]
         return image_files
     
@@ -76,10 +76,10 @@ def generate_binary_dataset(dataset_name: str,
     with open(f'{str(dataset_dir)}_{cls}_dataset.json', 'w') as f:
         json.dump({"images":f_list}, f)
 
-data_folder = settings.data_folder
-raw_data_folder = settings.raw_data_folder
+data_folder = settings.data_processing.data_folder
+raw_data_folder = settings.data_processing.raw_data_folder
 
-class_names = settings.class_names
+class_names = settings.data_processing.class_names
 
 for target_cls in class_names:
     generate_binary_dataset(

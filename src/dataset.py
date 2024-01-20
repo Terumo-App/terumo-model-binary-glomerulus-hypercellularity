@@ -6,9 +6,9 @@ class ImageDataLoader:
     def __init__(self, data_dir):
         self.data_dir = data_dir
         self.transform = transforms.Compose([
-            transforms.Resize(settings.img_size),
+            transforms.Resize(settings.image.img_size),
             transforms.ToTensor(),
-            transforms.Normalize(mean=settings.mean, std=settings.std)
+            transforms.Normalize(mean=settings.image.mean, std=settings.image.std)
         ])
         self.dataset = ImageFolder(self.data_dir, transform=self.transform, target_transform=self._get_class_name)
      

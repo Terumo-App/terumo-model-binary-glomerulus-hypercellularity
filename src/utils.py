@@ -1,12 +1,8 @@
 import wandb
-import torch
-import torch.nn.functional as F
 import os
 from PIL import Image
 import pandas as pd
 import numpy as np
-from tqdm import tqdm
-from torchvision import transforms
 from torch.utils.data import WeightedRandomSampler
 import torch
 from tqdm import tqdm
@@ -16,7 +12,7 @@ from pathlib import Path
 from torch import nn
 import yaml
 from src.metrics import Metrics
-from config import settings
+
 
 def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
     model.train()
@@ -134,28 +130,6 @@ def get_balanced_dataset_sampler(data_loader, train_ids, train_subset):
         sample_weights, num_samples=len(sample_weights), replacement=True
     )
     return sampler
-
-def get_train_transform():
-    return transforms.Compose([
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(settings.maxRotationAngle),
-        transforms.RandomResizedCrop(settings.cropSize),
-        transforms.ColorJitter(
-            brightness=settings.brightnessFactor,
-            contrast=settings.contrastFactor,
-            saturation=settings.saturationFactor,
-            hue=settings.hueFactor),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=settings.mean, std=settings.std)
-    ])
-
-def get_test_transform():
-    return transforms.Compose([
-        transforms.Resize(settings.img_size),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=settings.mean, std=settings.std)
-    ])
-
 
 
 def create_timestamp_folder(model_name):

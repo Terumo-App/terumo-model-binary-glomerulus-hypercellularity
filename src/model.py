@@ -7,7 +7,7 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.backbone = EfficientNet.from_pretrained('efficientnet-'+net_version)
         self.backbone._fc = nn.Sequential(
-            nn.Linear(settings.fcLayer, num_classes),
+            nn.Linear(settings.model.fcLayer, num_classes),
         )
         if freeze:
             # freeze backbone layers
