@@ -51,7 +51,9 @@ def main():
     binary_labels = [sample[1] for sample in data_loader.dataset.samples]
     for fold, (train_ids, test_ids) in enumerate(skfold.split(data_loader.dataset, binary_labels)):
 
-        initialize_wandb(PARAMS, fold+1, artifact_folder)
+        initialize_wandb(PARAMS, fold+1, artifact_folder,
+                         train_dataset=len(train_ids),
+                         val_dataset=len(test_ids))
         train_subset = Subset(data_loader.dataset, train_ids)
         train_subset.transform = get_train_transform()
         sampler = get_balanced_dataset_sampler(data_loader, train_ids, train_subset)
@@ -65,7 +67,7 @@ def main():
         print(f'Fold  {fold +1}')
 
         loss_fn = nn.CrossEntropyLoss()
-        model = Net(net_version="b0", num_classes=2, freeze=PARAMS["freeze"]).to(settings.config.DEVICE)
+        model = Net(net_version=settings.model.net_version, num_classes=2, freeze=PARAMS["freeze"]).to(settings.config.DEVICE)
         optimizer = optim.Adam(model.parameters(), lr=PARAMS['learning_rate'])
         scaler = torch.cuda.amp.GradScaler()
         set_gpu_mode(model)

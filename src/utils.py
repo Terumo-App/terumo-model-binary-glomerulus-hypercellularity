@@ -147,13 +147,13 @@ def create_timestamp_folder(model_name):
     return f'{model_name}_{folder_name}'
 
 
-def initialize_wandb(inputs: dict[str, Any], fold: int, folder_name: str):
+def initialize_wandb(inputs: dict[str, Any], fold: int, folder_name: str, **kwargs):
     if inputs['wandb_on']:
         wandb.init(
             name=f'{folder_name}_{fold}', 
             project=inputs['wandb_project'],
             entity=inputs['wandb_team'],
-            config=inputs | settings.to_dict()
+            config=inputs | settings.to_dict() | kwargs
             )
 
 

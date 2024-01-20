@@ -43,6 +43,7 @@ p_coarse_dropout = 0.2 # this transform is really strong, should not happen too 
 
 [model]
 
+net_version = "b0"
 fcLayer = 1280
 
 [config]
