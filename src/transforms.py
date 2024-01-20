@@ -62,7 +62,7 @@ class PadToAspectRatio(A.ImageOnlyTransform):
 
 
 def get_resize_transform(resize_mode: str, img_size: tuple[int, int])\
-        -> A.ImageOnlyTransform | A.DualTransform:
+        -> A.ImageOnlyTransform | A.DualTransform | A.Compose:
     if resize_mode == "interpolation":
         return A.Resize(height=img_size[0], width=img_size[1], always_apply=True, p=1)
     elif resize_mode == "random_crop":
@@ -74,10 +74,15 @@ def get_resize_transform(resize_mode: str, img_size: tuple[int, int])\
     elif (resize_mode == "zero_padding") or (resize_mode == "mirror_padding") \
         or (resize_mode == "replicate_padding"):
         aspect_ratio = img_size[0] / img_size[1]
-        return PadToAspectRatio(aspect_ratio=aspect_ratio,
+        pad_t = PadToAspectRatio(aspect_ratio=aspect_ratio,
                                 pad_mode=resize_mode,
                                 always_apply=True,
                                 p=1)
+        resize_no_distortion_t = A.Resize(height=img_size[0],
+                                          width=img_size[1],
+                                          always_apply=True,
+                                          p=1)
+        return A.Compose([pad_t, resize_no_distortion_t])
     else:
         raise ValueError(f"Invalid resize mode: '{resize_mode}'")
 
