@@ -5,12 +5,20 @@
 
 classes=("Normal" "Crescent" "Hypercelularidade" "Podocitopatia" "Sclerosis" "Membranous")
 target_classes=("Normal" "Crescent" "Hypercellularity" "Podocitopathy" "Sclerosis" "Membranous")
+colorings=( "AZAN" "HE" "PAMS" "PAS" "PICRO" )
 
-for dataset_folder in data/raw/Terumo_*; do
-    for ((i=0;i<${#classes[@]};++i)); do
-        if [[ $dataset_folder == *"Terumo_${classes[i]}"* ]]; then
-            echo "Moving ${dataset_folder} to data/raw/${target_classes[i]}"
-            mv $dataset_folder data/raw/${target_classes[i]}
-        fi
+for ((i=0;i<${#classes[@]};++i)); do
+	mkdir data/raw/${target_classes[i]}
+    for coloring in "${colorings[@]}"; do
+      dataset_folder="data/raw/Terumo_${classes[i]}_${coloring}"
+      if [[ -d "${dataset_folder}" ]]; then
+          echo "Moving '${dataset_folder}' to 'data/raw/${target_classes[i]}'"
+          mv ${dataset_folder} data/raw/${target_classes[i]}
+      fi
+      dataset_folder="data/raw/Terumo_${classes[i]}__${coloring}"
+      if [[ -d "${dataset_folder}" ]]; then
+          echo "Moving '${dataset_folder}' to 'data/raw/${target_classes[i]}'"
+          mv ${dataset_folder} data/raw/${target_classes[i]}
+      fi
     done
 done

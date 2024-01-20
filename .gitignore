@@ -16,3 +16,4 @@ notebooks/*.jpg
 
 .venv
 .idea
+local_scripts
