@@ -1,7 +1,9 @@
-import PIL.Image
+from typing import Sequence
+
 import albumentations as A
 import albumentations.pytorch
 import cv2
+import numpy as np
 
 from config import settings
 
@@ -18,14 +20,16 @@ class PadToAspectRatio(A.ImageOnlyTransform):
                  aspect_ratio: float | int = 1,
                  pad_mode: str = "zero_padding",
                  always_apply: bool = False,
-                 p: float = 1):
+                 p: float = 1,
+                 border_value: float | Sequence[float] = 0):
         super().__init__(always_apply, p)
         self.aspect_ratio: float | int = aspect_ratio
         self.pad_mode: str = pad_mode
         self.border_mode: cv2.BorderTypes
-        self.border_value: float | int = 0
+        self.border_value: float | Sequence[float] = 0
         if pad_mode == "zero_padding":
             self.border_mode = cv2.BORDER_CONSTANT
+            self.border_value = border_value
         elif pad_mode == "mirror_padding":
             self.border_mode = cv2.BORDER_REFLECT
         elif pad_mode == "replicate_padding":
@@ -33,25 +37,28 @@ class PadToAspectRatio(A.ImageOnlyTransform):
         else:
             raise ValueError(f"Invalid padding mode for PadToAspectRatio transform: '{pad_mode}'")
 
-    def apply(self, old_image: PIL.Image.Image, **params):
-        curr_aspect_ratio = (old_image.size[0]) / (old_image.size[1])
-        if curr_aspect_ratio == self.aspect_ratio:
-            return old_image
-        elif curr_aspect_ratio < self.aspect_ratio:
-            # pad vertical dimension (height)
-            target_h = int(self.aspect_ratio * old_image.size[1])
-            transform = A.PadIfNeeded(min_height=target_h,
-                                      min_width=0,
-                                      border_mode=self.border_mode,
-                                      value=self.border_value)
-        else:
-            # pad horizontal dimension (width)
-            target_w = int(old_image.size[0] / self.aspect_ratio)
-            transform = A.PadIfNeeded(min_height=0,
-                                      min_width=target_w,
-                                      border_mode=self.border_mode,
-                                      value=self.border_value)
-        return transform(old_image)["image"]
+    def apply(self, old_image: np.ndarray, **params) -> np.ndarray:
+        """
+        Let R_0 = H / W be the current aspect ratio and R the target aspect ratio
+        If R_0 < R:
+            resizes H to H_2 := floor(W * R)
+        else if R_0 > R:
+            resizes W to W_2 := floor(H / R)
+
+        :param old_image: a (H, W, C) numpy array
+        :param params:
+        :return: a new_image of size (H_2, W_2, C)
+            where H_2 = max(H, floor(W * R))
+            and W_2 = max(W, floor(H / R))
+        """
+        h, w = old_image.shape[0], old_image.shape[1]
+        min_h = max(h, int(w * self.aspect_ratio))
+        min_w = max(w, int(h / self.aspect_ratio))
+        transform = A.PadIfNeeded(min_height=min_h,
+                                  min_width=min_w,
+                                  border_mode=self.border_mode,
+                                  value=self.border_value)
+        return transform(image=old_image)["image"]
 
 
 def get_resize_transform(resize_mode: str, img_size: tuple[int, int])\
