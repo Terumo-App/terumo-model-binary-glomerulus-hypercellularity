@@ -1,16 +1,20 @@
 import wandb
 import os
-from PIL import Image
 import pandas as pd
 import numpy as np
-from torch.utils.data import WeightedRandomSampler
 import torch
-from tqdm import tqdm
 import torch.nn.functional as F
 import time
+import yaml
+
+from PIL import Image
+from torch.utils.data import WeightedRandomSampler
+from tqdm import tqdm
 from pathlib import Path
 from torch import nn
-import yaml
+from typing import Any
+
+from config import settings
 from src.metrics import Metrics
 
 
@@ -143,13 +147,13 @@ def create_timestamp_folder(model_name):
     return f'{model_name}_{folder_name}'
 
 
-def initialize_wandb(inputs, fold, folder_name):
+def initialize_wandb(inputs: dict[str, Any], fold: int, folder_name: str):
     if inputs['wandb_on']:
         wandb.init(
             name=f'{folder_name}_{fold}', 
             project=inputs['wandb_project'],
             entity=inputs['wandb_team'],
-            config=inputs
+            config=inputs | settings.to_dict()
             )
 
 
