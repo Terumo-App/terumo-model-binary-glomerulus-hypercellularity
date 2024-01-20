@@ -1,8 +1,15 @@
+import sys
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import DataLoader, Subset
+import torch.nn.functional as F
+import wandb
+
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from sklearn.model_selection import StratifiedKFold
+
 from src.model import Net
 from src.utils import (
      valid_epoch, 
@@ -19,14 +26,9 @@ from src.utils import (
      wandb_log_final_result
 )
 from src.transforms import get_train_transform, get_test_transform
-import sys
-from config import settings
 from src.dataset import ImageDataLoader
-from sklearn.model_selection import StratifiedKFold
-from torch.utils.data import DataLoader, Subset
-import torch.nn.functional as F
-import wandb
 from src.options import BaseOptions
+from config import settings
 
 # This flag allows you to enable the inbuilt cudnn auto-tuner to find the best algorithm to use for your hardware.
 # benchmark mode is good whenever your input sizes for your network do not vary. This way, cudnn will look for the optimal set of algorithms for that particular configuration (which takes some time). This usually leads to faster runtime.

@@ -1,10 +1,12 @@
 import random
-from pathlib import Path
 import sys
-from typing import List
 import re
 import json
+
+from pathlib import Path
+from typing import List
 from tqdm import tqdm
+
 from config import settings
 
 def generate_data_folders(dataset_name: str, new_folder_name: str = 'processed', data_folder: str = './data', raw_data_folder: str = 'raw'):
@@ -50,6 +52,8 @@ def generate_binary_dataset(dataset_name: str,
          raw_data_folder=raw_data_folder
          )
 
+    print("#"*80)
+    print(f"Building dataset for target class '{target_class}'")
     print("#"*80)
     f_list = []
     for cls in tqdm(class_list, total=len(class_list)):

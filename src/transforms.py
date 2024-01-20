@@ -1,9 +1,9 @@
-from typing import Sequence
-
 import albumentations as A
 import albumentations.pytorch
 import cv2
 import numpy as np
+
+from typing import Sequence
 
 from config import settings
 

@@ -1,5 +1,6 @@
 from torch import nn
 from efficientnet_pytorch import EfficientNet
+
 from config import settings
 
 class Net(nn.Module):

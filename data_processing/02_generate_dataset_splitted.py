@@ -1,9 +1,10 @@
 import random
-from pathlib import Path
 import os
-from typing import List
 import re
 import json
+
+from typing import List
+from pathlib import Path
 
 
 def generate_data_folders(dataset_name: str, data_folder: str = './data', raw_data_folder: str = 'raw'):
