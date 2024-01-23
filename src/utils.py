@@ -123,8 +123,8 @@ def make_prediction(model, transform, rootdir, device):
     print("Done with predictions")
 
 
-def get_balanced_dataset_sampler(data_loader, train_ids, train_subset):
-    binary_labels = [sample[1] for sample in data_loader.dataset.samples]
+def get_balanced_dataset_sampler(full_dataset, train_ids, train_subset):
+    binary_labels = [sample[1] for sample in full_dataset.samples]
     class_weights = 1 / np.unique(np.array(binary_labels)[train_ids], return_counts=True)[1] 
     sample_weights = [0] * len(train_ids)
     for idx, (data, label) in enumerate(train_subset):

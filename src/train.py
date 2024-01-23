@@ -26,7 +26,7 @@ from src.utils import (
      wandb_log_final_result
 )
 from src.transforms import get_train_transform, get_test_transform
-from src.dataset import ImageDataLoader
+from src.dataset import ImageFolderOverride
 from src.options import BaseOptions
 from config import settings
 
@@ -47,30 +47,30 @@ def main():
     artifact_folder = create_timestamp_folder(PARAMS['model_name'])
 
     skfold = StratifiedKFold(n_splits=PARAMS['n_folds'], shuffle=True)
-    data_loader = ImageDataLoader(PARAMS['data_dir'])
-    binary_labels = [sample[1] for sample in data_loader.dataset.samples]
-    for fold, (train_ids, test_ids) in enumerate(skfold.split(data_loader.dataset, binary_labels)):
+    full_dataset_train_mode = ImageFolderOverride(root=PARAMS['data_dir'],
+                                                  transform=get_train_transform(),
+                                                  target_transform=lambda index: index)
+    full_dataset_val_mode = ImageFolderOverride(root=PARAMS['data_dir'],
+                                                transform=get_test_transform(),
+                                                target_transform=lambda index: index)
+    binary_labels = [sample[1] for sample in full_dataset_train_mode.samples]
+    for fold, (train_ids, val_ids) in enumerate(skfold.split(full_dataset_train_mode, binary_labels)):
 
         initialize_wandb(PARAMS, fold+1, artifact_folder,
                          train_dataset=len(train_ids),
-                         val_dataset=len(test_ids))
-        train_subset = Subset(data_loader.dataset, train_ids)
-        train_subset.transform = get_train_transform()
-        sampler = get_balanced_dataset_sampler(data_loader, train_ids, train_subset)
+                         val_dataset=len(val_ids))
+        train_subset = Subset(full_dataset_train_mode, train_ids)
+        sampler = get_balanced_dataset_sampler(full_dataset_train_mode, train_ids, train_subset)
         train_loader = DataLoader(train_subset,
                                   batch_size=PARAMS['batch_size'],
                                   sampler=sampler,
                                   num_workers=PARAMS['num_workers'],
                                   shuffle=True)
-
-        test_subset = Subset(data_loader.dataset, test_ids) 
-        test_subset.transform = get_test_transform()
-        val_loader = DataLoader(test_subset,
+        val_subset = Subset(full_dataset_val_mode, val_ids)
+        val_loader = DataLoader(val_subset,
                                 batch_size=PARAMS['batch_size'],
                                 num_workers=PARAMS['num_workers'],
                                 shuffle=True)
-
-
         print(f'Fold  {fold +1}')
 
         loss_fn = nn.CrossEntropyLoss()
