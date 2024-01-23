@@ -57,11 +57,18 @@ def main():
         train_subset = Subset(data_loader.dataset, train_ids)
         train_subset.transform = get_train_transform()
         sampler = get_balanced_dataset_sampler(data_loader, train_ids, train_subset)
-        train_loader = DataLoader(train_subset, batch_size=PARAMS['batch_size'], sampler=sampler, num_workers=PARAMS['num_workers'])
+        train_loader = DataLoader(train_subset,
+                                  batch_size=PARAMS['batch_size'],
+                                  sampler=sampler,
+                                  num_workers=PARAMS['num_workers'],
+                                  shuffle=True)
 
         test_subset = Subset(data_loader.dataset, test_ids) 
         test_subset.transform = get_test_transform()
-        val_loader = DataLoader(test_subset, batch_size=PARAMS['batch_size'], num_workers=PARAMS['num_workers'], shuffle=True )
+        val_loader = DataLoader(test_subset,
+                                batch_size=PARAMS['batch_size'],
+                                num_workers=PARAMS['num_workers'],
+                                shuffle=True)
 
 
         print(f'Fold  {fold +1}')
@@ -79,9 +86,6 @@ def main():
         
         max_val_accuracy, min_val_loss = 0, sys.maxsize
         for epoch in range(PARAMS['num_epochs']):
-                   
-
-
             train_metrics = train_epoch(train_loader, model, optimizer, loss_fn, scaler, settings.config.DEVICE)
             test_metrics = valid_epoch(val_loader, model, loss_fn, settings.config.DEVICE)
 
@@ -112,7 +116,6 @@ def main():
             if min_val_loss > test_loss:
                 min_val_loss = test_loss
                 save_checkpoint(model, optimizer, artifact_folder, 'min_loss', fold)
-        
 
         if PARAMS['wandb_on']:
             _, _, metrics = valid_epoch(val_loader, model, loss_fn, settings.config.DEVICE)
