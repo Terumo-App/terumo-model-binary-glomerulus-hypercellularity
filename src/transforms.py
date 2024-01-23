@@ -92,8 +92,9 @@ def get_train_transform():
         get_resize_transform(settings.image.RESIZE_MODE, settings.image.IMG_SIZE),
         A.Normalize(mean=settings.image.MEAN, std=settings.image.STD),
         A.HorizontalFlip(settings.augmentation.P_HORIZONTAL_FLIP),
-        A.HorizontalFlip(settings.augmentation.P_VERTICAL_FLIP),
-        A.Rotate(settings.augmentation.MAX_ROTATION_ANGLE, settings.augmentation.P_ROTATION),
+        A.VerticalFlip(settings.augmentation.P_VERTICAL_FLIP),
+        A.Rotate(limit=settings.augmentation.MAX_ROTATION_ANGLE,
+                 p=settings.augmentation.P_ROTATION),
         A.ColorJitter(
             brightness=settings.augmentation.BRIGHTNESS_FACTOR,
             contrast=settings.augmentation.CONTRAST_FACTOR,
