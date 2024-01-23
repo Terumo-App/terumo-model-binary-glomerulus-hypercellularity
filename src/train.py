@@ -64,8 +64,7 @@ def main():
         train_loader = DataLoader(train_subset,
                                   batch_size=PARAMS['batch_size'],
                                   sampler=sampler,
-                                  num_workers=PARAMS['num_workers'],
-                                  shuffle=True)
+                                  num_workers=PARAMS['num_workers'])
         val_subset = Subset(full_dataset_val_mode, val_ids)
         val_loader = DataLoader(val_subset,
                                 batch_size=PARAMS['batch_size'],
