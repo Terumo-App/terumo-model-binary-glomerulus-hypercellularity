@@ -1,5 +1,6 @@
-import cv2
 import numpy as np
+
+from PIL import Image
 
 from torchvision.datasets import ImageFolder
 
@@ -10,15 +11,15 @@ class ImageFolderOverride(ImageFolder):
                  target_transform):
         def loader(img_path: str) -> np.ndarray:
             """
-            Opens image path with OpenCV and convert the color channel disposition to the correct order
-            (since OpenCV uses BGR and we usually use RGB (in numpy, torch, etc))
-            Source: https://albumentations.ai/docs/examples/pytorch_classification/
+            Opens image path with PIL (Python Imaging Library)
+
+            Returns a channel-first image as a numpy ndarray (since pytorch uses channel-first images)
             :param img_path: str
-            :return: ndarray (image as numpy ndarray)
+            :return: ndarray (image as numpy ndarray, with channel-first dimension disposition)
             """
-            image = cv2.imread(img_path)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            return image
+            image: Image = Image.open(img_path)
+            image_arr: np.ndarray = np.asarray(image)  # channel-last, (H, W, C), see docs
+            return np.moveaxis(image_arr, -1, 0)  # (C, H, W)
         super().__init__(root=root, transform=transform, target_transform=target_transform, loader=loader)
 
     def __getitem__(self, index: int):
