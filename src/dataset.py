@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 from PIL import Image
 
@@ -13,13 +14,14 @@ class ImageFolderOverride(ImageFolder):
             """
             Opens image path with PIL (Python Imaging Library)
 
-            Returns a channel-first image as a numpy ndarray (since pytorch uses channel-first images)
+            Returns a channel-last image as a numpy ndarray
+            (albumentations assumes a channel-last image and we use it for augmentation)
             :param img_path: str
-            :return: ndarray (image as numpy ndarray, with channel-first dimension disposition)
+            :return: ndarray (image as numpy ndarray, with channel-last dimension disposition)
             """
             image: Image = Image.open(img_path)
             image_arr: np.ndarray = np.asarray(image)  # channel-last, (H, W, C), see docs
-            return np.moveaxis(image_arr, -1, 0)  # (C, H, W)
+            return image_arr
         super().__init__(root=root, transform=transform, target_transform=target_transform, loader=loader)
 
     def __getitem__(self, index: int):
@@ -33,6 +35,10 @@ class ImageFolderOverride(ImageFolder):
 
         Returns:
             tuple: (sample, target) where target is class_index of the target class.
+            and sample is a channel-last (C, H, W) image tensor.
+
+            It keeps the type of the underlying transform pipeline (if it returns a numpy ndarray, this
+            returns a ndarray, if it returns a torch Tensor, this returns a torch Tensor - else RuntimeError)
         """
         path, target = self.samples[index]
         sample = self.loader(path)
@@ -40,7 +46,10 @@ class ImageFolderOverride(ImageFolder):
             sample = self.transform(image=sample)["image"]
         if self.target_transform is not None:
             target = self.target_transform(target)
-
+        if (isinstance(sample, np.ndarray)):
+            sample = np.moveaxis(sample, -1, 0)  # (C, H, W)
+        elif (not isinstance(sample, torch.Tensor)):
+            raise RuntimeError(f"Invalid type returned from augmentation pipeline: expected numpy.ndarray or torch.Tensor, got '{type(sample)}'")
         return sample, target
 
     def _get_class_name(self, index):
