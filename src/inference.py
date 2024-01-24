@@ -1,7 +1,10 @@
 import argparse
+import numpy as np
 import torch.utils.data
-
 import torchvision.datasets
+import albumentations as A
+
+from PIL import Image
 
 from src.dataset import ImageFolderOverride
 from src.metrics import Metrics
@@ -13,9 +16,9 @@ from src.transforms import get_test_transform
 
 def setup_argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config-file", type=str)
+    parser.add_argument("--config_file", type=str)
     parser.add_argument("--checkpoint", type=str)
-    parser.add_argument("--test-dataset", type=str)
+    parser.add_argument("--test_dataset", type=str)
     parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("-v", "--verbose", action="store_true")
     return parser
@@ -45,9 +48,15 @@ def inference(checkpoint_path: str,
               verbose: bool = True) -> tuple[float, int, Metrics]:
     run_params = load_training_parameters(config_file_path)
     model, opt = setup_model(checkpoint_path, device, lr=run_params["learning_rate"])
+
+    def in_the_wild_loader(path: str) -> np.ndarray:
+        rgb_image = Image.open(path).convert("RGB")
+        return np.asarray(rgb_image)
+
     test_dataset = ImageFolderOverride(root=test_data_dir,
                                        transform=get_test_transform(),
-                                       target_transform=lambda index: index)
+                                       target_transform=lambda index: index,
+                                       loader=in_the_wild_loader)
     test_dataloader = torch.utils.data.DataLoader(dataset=test_dataset,
                                                   batch_size=run_params["batch_size"],
                                                   shuffle=False,
@@ -55,6 +64,7 @@ def inference(checkpoint_path: str,
     loss_fn = torch.nn.CrossEntropyLoss(reduction="mean")
     if verbose:
         print(f"Running on device='{device}'")
+        print(f"Testing on {len(test_dataset)} images")
     test_loss, test_correct_cnt, test_metrics = valid_epoch(loader=test_dataloader,
                                                             model=model,
                                                             loss_fn=loss_fn,
