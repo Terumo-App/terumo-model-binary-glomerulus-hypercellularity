@@ -1,4 +1,3 @@
-import random
 import sys
 import re
 import json
@@ -80,15 +79,24 @@ def generate_binary_dataset(dataset_name: str,
     with open(f'{str(dataset_dir)}_{cls}_dataset.json', 'w') as f:
         json.dump({"images":f_list}, f)
 
-data_folder = settings.data_processing.data_folder
-raw_data_folder = settings.data_processing.raw_data_folder
 
-class_names = settings.data_processing.class_names
+if __name__ == '__main__':
+    class_names = settings.data_processing.class_names
 
-for target_cls in class_names:
-    generate_binary_dataset(
-            dataset_name='binary_' + target_cls, 
-            class_list=class_names,
-            target_class=target_cls,
-            new_folder_name='binary',
-            data_folder=data_folder)
+    if len(sys.argv) > 3:
+        data_folder = sys.argv[1]
+        raw_data_folder = sys.argv[2]
+        binary_folder = sys.argv[3]
+    else:
+        data_folder = settings.data_processing.data_folder
+        raw_data_folder = settings.data_processing.raw_data_folder
+        binary_folder = 'binary'
+
+    for target_cls in class_names:
+        generate_binary_dataset(
+                dataset_name='binary_' + target_cls,
+                class_list=class_names,
+                target_class=target_cls,
+                new_folder_name=binary_folder,
+                data_folder=data_folder,
+                raw_data_folder=raw_data_folder)
