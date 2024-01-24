@@ -12,6 +12,6 @@ num_epochs: 1
 freeze: False
 wandb_on: True
 wandb_key: '273b6e50d83b95fd3a12d6544e5d48bf5afa49e2'
-model_name: 'Hypercelularidade'
+model_name: 'Hypercellularity'
 data_dir: './data/binary/binary_Hypercellularity'
 classes: ['_others', 'Hypercellularity']
