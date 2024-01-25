@@ -76,7 +76,6 @@ def valid_epoch(loader, model, loss_fn=None, device="cuda"):
             y_true.extend(y.tolist())
             y_pred.extend(pred.tolist())
 
-
     metrics_result = Metrics()
     metrics_result.compute_metrics(y_true, y_pred)
     
@@ -86,7 +85,8 @@ def valid_epoch(loader, model, loss_fn=None, device="cuda"):
 
     
 
-def save_checkpoint(model, optimizer, create_timestamp_folder, metric_type, fold=""):
+def save_checkpoint(model, optimizer, create_timestamp_folder, metric_type, fold="",
+                    log_to_wandb: bool = False, checkpoint_artifact: wandb.Artifact | None = None):
     if not os.path.exists('./artifacts'):
         os.mkdir('./artifacts')
     state = {'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}
@@ -94,7 +94,8 @@ def save_checkpoint(model, optimizer, create_timestamp_folder, metric_type, fold
     filename=f"./artifacts/{create_timestamp_folder}/{fold}_fold_{metric_type}_checkpoint.pth.tar"
     # print("Saving checkpoint...")
     torch.save(state, filename)
-
+    if log_to_wandb:
+        checkpoint_artifact.add_file(filename)
 
 
 def load_checkpoint(path, model, optimizer):
