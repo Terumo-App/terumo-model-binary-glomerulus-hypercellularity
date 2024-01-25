@@ -96,19 +96,19 @@ def get_train_transform():
         A.Rotate(limit=settings.augmentation.MAX_ROTATION_ANGLE,
                  p=settings.augmentation.P_ROTATION),
         A.ColorJitter(
-            brightness=settings.augmentation.BRIGHTNESS_FACTOR,
-            contrast=settings.augmentation.CONTRAST_FACTOR,
-            saturation=settings.augmentation.SATURATION_FACTOR,
-            hue=settings.augmentation.HUE_FACTOR,
-            p=settings.augmentation.P_COLOR_JITTER),
+            brightness=settings.augmentation.COLOR.BRIGHTNESS_FACTOR,
+            contrast=settings.augmentation.COLOR.CONTRAST_FACTOR,
+            saturation=settings.augmentation.COLOR.SATURATION_FACTOR,
+            hue=settings.augmentation.COLOR.HUE_FACTOR,
+            p=settings.augmentation.COLOR.P_COLOR_JITTER),
         A.GaussNoise(
-            var_limit=settings.augmentation.GAUSS_NOISE_VAR_RANGE,
-            mean=settings.augmentation.GAUSS_NOISE_MEAN,
-            p=settings.augmentation.P_GAUSS_NOISE
+            var_limit=settings.augmentation.NOISE.GAUSS_NOISE_VAR_RANGE,
+            mean=settings.augmentation.NOISE.GAUSS_NOISE_MEAN,
+            p=settings.augmentation.NOISE.P_GAUSS_NOISE
         ),
         A.GaussianBlur(
-            blur_limit=settings.augmentation.GAUSS_BLUR_LIMIT,
-            p=settings.augmentation.P_GAUSS_BLUR
+            blur_limit=settings.augmentation.NOISE.GAUSS_BLUR_LIMIT,
+            p=settings.augmentation.NOISE.P_GAUSS_BLUR
         ),
         A.CoarseDropout(
             max_holes=settings.augmentation.COARSE_DROPOUT.MAX_HOLES,
@@ -120,6 +120,23 @@ def get_train_transform():
             fill_value=0,
             mask_fill_value=0,
             p=settings.augmentation.COARSE_DROPOUT.P_COARSE_DROPOUT),
+        A.OneOf(
+            [
+                A.OpticalDistortion(p=settings.augmentation.DISTORTION.P_OPTICAL_DISTORTION),
+                A.GridDistortion(p=settings.augmentation.DISTORTION.P_GRID_DISTORTION),
+                A.PiecewiseAffine(p=settings.augmentation.DISTORTION.P_PIECEWISE_AFFINE),
+            ],
+            p=settings.augmentation.DISTORTION.P_DISTORTION
+        ),
+        A.ShiftScaleRotate(
+            shift_limit=settings.augmentation.SHIFT.SHIFT_LIMIT,
+            scale_limit=settings.augmentation.SHIFT.SCALE_LIMIT,
+            rotate_limit=settings.augmentation.SHIFT.ROTATE_LIMIT,
+            interpolation=cv2.INTER_LINEAR,
+            border_mode=0,
+            value=(0, 0, 0),
+            p=settings.augmentation.SHIFT.P_SHIFT
+        ),
         A.pytorch.ToTensorV2(),
     ])
     return albumentations_t
