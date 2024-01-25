@@ -1,3 +1,5 @@
+from typing import Callable
+
 import numpy as np
 import torch
 
@@ -5,12 +7,14 @@ from PIL import Image
 
 from torchvision.datasets import ImageFolder
 
+
 class ImageFolderOverride(ImageFolder):
     def __init__(self,
                  root: str,
                  transform,
-                 target_transform):
-        def loader(img_path: str) -> np.ndarray:
+                 target_transform,
+                 loader: Callable[[str], np.ndarray] | None = None):
+        def base_loader(img_path: str) -> np.ndarray:
             """
             Opens image path with PIL (Python Imaging Library)
 
@@ -22,7 +26,11 @@ class ImageFolderOverride(ImageFolder):
             image: Image = Image.open(img_path)
             image_arr: np.ndarray = np.asarray(image)  # channel-last, (H, W, C), see docs
             return image_arr
-        super().__init__(root=root, transform=transform, target_transform=target_transform, loader=loader)
+
+        if loader is None:
+            super().__init__(root=root, transform=transform, target_transform=target_transform, loader=base_loader)
+        else:
+            super().__init__(root=root, transform=transform, target_transform=target_transform, loader=loader)
 
     def __getitem__(self, index: int):
         """
@@ -46,10 +54,11 @@ class ImageFolderOverride(ImageFolder):
             sample = self.transform(image=sample)["image"]
         if self.target_transform is not None:
             target = self.target_transform(target)
-        if (isinstance(sample, np.ndarray)):
+        if isinstance(sample, np.ndarray):
             sample = np.moveaxis(sample, -1, 0)  # (C, H, W)
-        elif (not isinstance(sample, torch.Tensor)):
-            raise RuntimeError(f"Invalid type returned from augmentation pipeline: expected numpy.ndarray or torch.Tensor, got '{type(sample)}'")
+        elif not isinstance(sample, torch.Tensor):
+            raise RuntimeError(f"Invalid type returned from augmentation pipeline: "
+                               f"expected numpy.ndarray or torch.Tensor, got '{type(sample)}'")
         return sample, target
 
     def _get_class_name(self, index):
