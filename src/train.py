@@ -1,3 +1,4 @@
+import os
 import sys
 import torch
 import torch.nn as nn
@@ -38,10 +39,6 @@ torch.backends.cudnn.benchmark = True
 opt = BaseOptions().parse()
 PARAMS = load_training_parameters(opt.config_file)
 wandb.login(key=PARAMS['wandb_key'])
-CHECKPOINT_ARTIFACT_MIN_LOSS: wandb.Artifact | None = wandb.Artifact(name="checkpoint_min_loss", type="model")\
-    if (PARAMS["wandb_on"] and PARAMS["wandb_save_checkpoint"]) else None
-CHECKPOINT_ARTIFACT_MAX_ACC: wandb.Artifact | None = wandb.Artifact(name="checkpoint_max_acc", type="model") \
-    if (PARAMS["wandb_on"] and PARAMS["wandb_save_checkpoint"]) else None
 
 
 def setup_early_stopper(params) -> EarlyStopper:
@@ -62,12 +59,15 @@ def setup_early_stopper(params) -> EarlyStopper:
 
 
 def main():
+    artifact_folder = create_timestamp_folder(PARAMS['model_name'])
+
+    ## --- setup device
     if settings.config.DEVICE == 'cuda' and not torch.cuda.is_available():
         raise ValueError("DEVICE is set to cuda but cuda is not available")
-
     print(f'Device is {settings.config.DEVICE}')
-    
-    artifact_folder = create_timestamp_folder(PARAMS['model_name'])
+
+
+    ## --- setup kfold cross-validation
     skfold = StratifiedKFold(n_splits=PARAMS['n_folds'], shuffle=True)
     full_dataset_train_mode = ImageFolderOverride(root=PARAMS['data_dir'],
                                                   transform=get_train_transform(),
@@ -76,11 +76,19 @@ def main():
                                                 transform=get_test_transform(),
                                                 target_transform=lambda index: index)
     binary_labels = [sample[1] for sample in full_dataset_train_mode.samples]
+
+    ## --- setup early stopper
     early_stopper = setup_early_stopper(PARAMS)
 
     for fold, (train_ids, val_ids) in enumerate(skfold.split(full_dataset_train_mode, binary_labels)):
-        # reset early stopper
+        ## --- reset early stopper
         early_stopper.reset()
+
+        ## --- setup artifacts
+        checkpoint_artifact_min_loss: wandb.Artifact | None = wandb.Artifact(name="checkpoint_min_loss", type="model") \
+            if (PARAMS["wandb_on"] and PARAMS["wandb_save_checkpoint"]) else None
+        checkpoint_artifact_max_acc: wandb.Artifact | None = wandb.Artifact(name="checkpoint_max_acc", type="model") \
+            if (PARAMS["wandb_on"] and PARAMS["wandb_save_checkpoint"]) else None
 
         initialize_wandb(PARAMS, fold+1, artifact_folder,
                          train_dataset=len(train_ids),
@@ -134,19 +142,21 @@ def main():
 
             if max_val_accuracy < val_acc:
                 max_val_accuracy = val_acc
+                send_to_wandb = PARAMS["wandb_save_checkpoint_each_epoch"]\
+                    if "wandb_save_checkpoint_each_epoch" in PARAMS else False
                 save_checkpoint(model, optimizer, artifact_folder, 'max_acc', fold,
-                                log_to_wandb=PARAMS["wandb_on"] and PARAMS["wandb_save_checkpoint"],
-                                checkpoint_artifact=CHECKPOINT_ARTIFACT_MAX_ACC)
+                                log_to_wandb=PARAMS["wandb_on"] and send_to_wandb,
+                                checkpoint_artifact=checkpoint_artifact_max_acc)
 
             if min_val_loss > val_loss:
                 min_val_loss = val_loss
+                send_to_wandb = PARAMS["wandb_save_checkpoint_each_epoch"] \
+                    if "wandb_save_checkpoint_each_epoch" in PARAMS else False
                 save_checkpoint(model, optimizer, artifact_folder, 'min_loss', fold,
-                                log_to_wandb = PARAMS["wandb_on"] and PARAMS["wandb_save_checkpoint"],
-                                checkpoint_artifact=CHECKPOINT_ARTIFACT_MIN_LOSS)
+                                log_to_wandb = PARAMS["wandb_on"] and send_to_wandb,
+                                checkpoint_artifact=checkpoint_artifact_min_loss)
 
             wandb_log_final_result(val_metrics, PARAMS)
-            wandb.log_artifact(CHECKPOINT_ARTIFACT_MIN_LOSS)
-            wandb.log_artifact(CHECKPOINT_ARTIFACT_MAX_ACC)
             wandb.finish()
 
             # after everything, so the run does not break
