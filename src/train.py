@@ -84,15 +84,17 @@ def main():
         ## --- reset early stopper
         early_stopper.reset()
 
+        # start wandb connection
+        initialize_wandb(PARAMS, fold+1, artifact_folder,
+                         train_dataset=len(train_ids),
+                         val_dataset=len(val_ids))
+
         ## --- setup artifacts
         checkpoint_artifact_min_loss: wandb.Artifact | None = wandb.Artifact(name="checkpoint_min_loss", type="model") \
             if (PARAMS["wandb_on"] and PARAMS["wandb_save_checkpoint"]) else None
         checkpoint_artifact_max_acc: wandb.Artifact | None = wandb.Artifact(name="checkpoint_max_acc", type="model") \
             if (PARAMS["wandb_on"] and PARAMS["wandb_save_checkpoint"]) else None
 
-        initialize_wandb(PARAMS, fold+1, artifact_folder,
-                         train_dataset=len(train_ids),
-                         val_dataset=len(val_ids))
         train_subset = Subset(full_dataset_train_mode, train_ids)
         sampler = get_balanced_dataset_sampler(full_dataset_train_mode, train_ids, train_subset)
         train_loader = DataLoader(train_subset,
