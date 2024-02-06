@@ -224,7 +224,8 @@ def load_training_parameters(filename):
         params = yaml.safe_load(file)
     return params
 
-def wandb_log_final_result(metrics:Metrics, config):
+
+def wandb_log_final_result(metrics:Metrics, loss: float, config):
 
     wandb.log({"conf_mat" : wandb.plot.confusion_matrix(probs=None,
                             y_true=metrics.y_true, preds=metrics.y_pred,
@@ -236,11 +237,12 @@ def wandb_log_final_result(metrics:Metrics, config):
     # wandb.log({"ROC" : wandb.plot.roc_curve(metrics.y_true, metrics.y_pred,
     #                         labels=config['classes'])})
 
-    wandb.summary['test_accuracy'] = metrics.accuracy
-    wandb.summary['test_precision'] = metrics.precision
-    wandb.summary['test_recall'] = metrics.recall
-    wandb.summary['test_fscore'] = metrics.fscore
-    wandb.summary['test_kappa'] = metrics.kappa
+    wandb.summary['val_loss'] = loss
+    wandb.summary['val_accuracy'] = metrics.accuracy
+    wandb.summary['val_precision'] = metrics.precision
+    wandb.summary['val_recall'] = metrics.recall
+    wandb.summary['val_fscore'] = metrics.fscore
+    wandb.summary['val_kappa'] = metrics.kappa
     # wandb.log({
     #     'final_accuracy': metrics.accuracy,
     #     'final_precision': metrics.precision,

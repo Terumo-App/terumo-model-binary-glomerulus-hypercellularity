@@ -31,9 +31,9 @@ class EarlyStopper:
         self.threshold_trigger_state: bool = False
 
     def register_metric(self, value: float) -> None:
-        if (self.mode == "min") and (value > self.best_value - self.delta):
+        if (self.mode == "min") and (value >= self.best_value - self.delta):
             self.patience_count += 1
-        elif (self.mode == "max") and (value < self.best_value + self.delta):
+        elif (self.mode == "max") and (value <= self.best_value + self.delta):
             self.patience_count += 1
         else:
             self.best_value = value

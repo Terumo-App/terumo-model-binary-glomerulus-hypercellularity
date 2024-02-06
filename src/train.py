@@ -1,5 +1,7 @@
 import os
 import sys
+from typing import Any
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -37,16 +39,16 @@ from config import settings
 # But if your input sizes changes at each iteration, then cudnn will benchmark every time a new size appears, possibly leading to worse runtime performances.
 torch.backends.cudnn.benchmark = True
 opt = BaseOptions().parse()
-PARAMS = load_training_parameters(opt.config_file)
+PARAMS: dict[str, Any] = load_training_parameters(opt.config_file)
 wandb.login(key=PARAMS['wandb_key'])
 
 
 def setup_early_stopper(params) -> EarlyStopper:
-    patience = PARAMS["patience"] if "patience" in PARAMS else float("inf")
-    delta = PARAMS["delta"] if "delta" in PARAMS else 0
-    mode = PARAMS["mode"] if "mode" in PARAMS else "min"
-    threshold_mode = PARAMS["threshold_mode"] if "threshold_mode" in PARAMS else "min"
-    threshold = PARAMS["threshold"] if "threshold" in PARAMS else None
+    patience = PARAMS.get("patience", float("inf"))
+    delta = PARAMS.get("delta", 0.0)
+    mode = PARAMS.get("mode", "min")
+    threshold_mode = PARAMS.get("threshold_mode", "min")
+    threshold = PARAMS.get("threshold", None)
 
     early_stopper = EarlyStopper(
         patience=patience,
@@ -88,12 +90,6 @@ def main():
         initialize_wandb(PARAMS, fold+1, artifact_folder,
                          train_dataset=len(train_ids),
                          val_dataset=len(val_ids))
-
-        ## --- setup artifacts
-        checkpoint_artifact_min_loss: wandb.Artifact | None = wandb.Artifact(name="checkpoint_min_loss", type="model") \
-            if (PARAMS["wandb_on"] and PARAMS["wandb_save_checkpoint"]) else None
-        checkpoint_artifact_max_acc: wandb.Artifact | None = wandb.Artifact(name="checkpoint_max_acc", type="model") \
-            if (PARAMS["wandb_on"] and PARAMS["wandb_save_checkpoint"]) else None
 
         train_subset = Subset(full_dataset_train_mode, train_ids)
         sampler = get_balanced_dataset_sampler(full_dataset_train_mode, train_ids, train_subset)
@@ -144,22 +140,14 @@ def main():
 
             if max_val_accuracy < val_acc:
                 max_val_accuracy = val_acc
-                send_to_wandb = PARAMS["wandb_save_checkpoint_each_epoch"]\
-                    if "wandb_save_checkpoint_each_epoch" in PARAMS else False
                 save_checkpoint(model, optimizer, artifact_folder, 'max_acc', fold,
-                                log_to_wandb=PARAMS["wandb_on"] and send_to_wandb,
-                                checkpoint_artifact=checkpoint_artifact_max_acc)
+                                log_to_wandb=False)
 
             if min_val_loss > val_loss:
                 min_val_loss = val_loss
-                send_to_wandb = PARAMS["wandb_save_checkpoint_each_epoch"] \
-                    if "wandb_save_checkpoint_each_epoch" in PARAMS else False
                 save_checkpoint(model, optimizer, artifact_folder, 'min_loss', fold,
-                                log_to_wandb = PARAMS["wandb_on"] and send_to_wandb,
-                                checkpoint_artifact=checkpoint_artifact_min_loss)
+                                log_to_wandb=False)
 
-            wandb_log_final_result(val_metrics, PARAMS)
-            wandb.finish()
 
             # after everything, so the run does not break
             early_stopper.register_metric(val_loss)
@@ -167,6 +155,13 @@ def main():
                 early_stopper.reset()
                 early_stopper.log_if_stopped()
                 break
+
+        final_val_loss, _, final_val_metrics = valid_epoch(val_loader,
+                                              model,
+                                              loss_fn,
+                                              settings.config.DEVICE)
+        wandb_log_final_result(final_val_metrics, final_val_loss, PARAMS)
+        wandb.finish()
 
 
 if __name__ == "__main__":
