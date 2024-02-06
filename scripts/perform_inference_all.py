@@ -28,6 +28,7 @@ def setup_argparse() -> argparse.ArgumentParser:
     parser.add_argument("--mode", type=str, default="min_loss")
     return parser
 
+
 def find_last_checkpoint_dir(class_name: str, search_dir: str) -> str:
     all_checkpoint_dirs = os.listdir(search_dir)
     class_checkpoints = list(filter(lambda path: re.fullmatch(f"{class_name}.*", path) is not None,
@@ -35,6 +36,7 @@ def find_last_checkpoint_dir(class_name: str, search_dir: str) -> str:
     class_checkpoints = list(filter(lambda path: os.path.isdir(os.path.join(search_dir, path)),
                                     class_checkpoints))  # filter for directories only
     try:
+        print("Using checkpoint folder: ", sorted(class_checkpoints)[-1])
         return sorted(class_checkpoints)[-1]
     except IndexError:
         raise IndexError(f"No files match pattern '{class_name}.*' in directory {search_dir}")
@@ -52,12 +54,14 @@ def main():
     parser = setup_argparse()
     args = parser.parse_args()
     for class_name in settings.data_processing.class_names:
+        print(f" {class_name} binary classifier ".center(80, '-'))
+
         config_file = CONFIG_FILES_MAPPING[class_name]
+        print("Using config file: ", config_file)
         checkpoint_files = generate_checkpoint_files(class_name, search_dir=args.checkpoint_dir, mode=args.mode)
         test_losses: list[float] = []
         test_metrics: list[Metrics] = []
 
-        print(f" {class_name} binary classifier ".center(80, '-'))
         for checkpoint in checkpoint_files:
             if args.verbose:
                 print(f"Fold from checkpoint file '{checkpoint}'", end=2*'\n')
