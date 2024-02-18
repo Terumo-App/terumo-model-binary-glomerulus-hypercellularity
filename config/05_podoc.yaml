@@ -1,67 +1,19 @@
-
-project: 'model-binary-glomerulus-podocytopathy'
+wandb_project: 'podocytopathy'
+wandb_team: 'terumo-binary'
 n_folds: 5
 seed: 42
-num_workers: 0
-batch_size: 128
+num_workers: 4
+batch_size: 64
 pin_memory: True
 load_model: False
 checkpoint_to_be_loaded: './artifacts/model/my_checkpoint.pth.tar'
 learning_rate: 0.0001
-num_epochs: 15
+num_epochs: 300
+freeze: False
 wandb_on: True
-model_name: 'podoc_others'
-data_dir: './data/binary/podoc_others/'
-classes: ['podocytopathy', 'others']
-data_folders:
-  - '..\data\binary\podoc_others\others'
-  - '..\data\binary\podoc_others\_podocitopatia'
-  - '..\data\binary\podoc_others\others\Crescentes'
-  - '..\data\binary\podoc_others\others\hipercellularity'
-  - '..\data\binary\podoc_others\others\membranous'
-  - '..\data\binary\podoc_others\others\normal'
-  - '..\data\binary\podoc_others\others\sclerosis'
-  - '..\data\binary\podoc_others\others\Crescentes\AZAN'
-  - '..\data\binary\podoc_others\others\Crescentes\H_E'
-  - '..\data\binary\podoc_others\others\Crescentes\PAMS'
-  - '..\data\binary\podoc_others\others\Crescentes\PAS'
-  - '..\data\binary\podoc_others\others\Crescentes\PICRO'
-  - '..\data\binary\podoc_others\others\Crescentes\PS'
-  - '..\data\binary\podoc_others\others\hipercellularity\AZAN'
-  - '..\data\binary\podoc_others\others\hipercellularity\HE'
-  - '..\data\binary\podoc_others\others\hipercellularity\PAS'
-  - '..\data\binary\podoc_others\others\hipercellularity\PS'
-  - '..\data\binary\podoc_others\others\hipercellularity\PSA'
-  - '..\data\binary\podoc_others\others\membranous\primary_membranous'
-  - '..\data\binary\podoc_others\others\membranous\secondary_membranous'
-  - '..\data\binary\podoc_others\others\membranous\primary_membranous\AZAN'
-  - '..\data\binary\podoc_others\others\membranous\primary_membranous\HE'
-  - '..\data\binary\podoc_others\others\membranous\primary_membranous\PAMS'
-  - '..\data\binary\podoc_others\others\membranous\primary_membranous\PAS'
-  - '..\data\binary\podoc_others\others\membranous\primary_membranous\PICRO'
-  - '..\data\binary\podoc_others\others\membranous\secondary_membranous\AZAN'
-  - '..\data\binary\podoc_others\others\membranous\secondary_membranous\HE'
-  - '..\data\binary\podoc_others\others\membranous\secondary_membranous\PAMS'
-  - '..\data\binary\podoc_others\others\membranous\secondary_membranous\PAS'
-  - '..\data\binary\podoc_others\others\membranous\secondary_membranous\PICRO'
-  - '..\data\binary\podoc_others\others\normal\AZAN'
-  - '..\data\binary\podoc_others\others\normal\HE'
-  - '..\data\binary\podoc_others\others\normal\PAMS'
-  - '..\data\binary\podoc_others\others\normal\PAS'
-  - '..\data\binary\podoc_others\others\normal\PICRO'
-  - '..\data\binary\podoc_others\others\sclerosis\sclerosis'
-  - '..\data\binary\podoc_others\others\sclerosis\sclerosis_withoutMemb'
-  - '..\data\binary\podoc_others\others\sclerosis\sclerosis\HE'
-  - '..\data\binary\podoc_others\others\sclerosis\sclerosis\PAMS'
-  - '..\data\binary\podoc_others\others\sclerosis\sclerosis\PAS'
-  - '..\data\binary\podoc_others\others\sclerosis\sclerosis_withoutMemb\AZAN'
-  - '..\data\binary\podoc_others\others\sclerosis\sclerosis_withoutMemb\HE'
-  - '..\data\binary\podoc_others\others\sclerosis\sclerosis_withoutMemb\PAMS'
-  - '..\data\binary\podoc_others\others\sclerosis\sclerosis_withoutMemb\PAS'
-  - '..\data\binary\podoc_others\others\sclerosis\sclerosis_withoutMemb\PS'
-  - '..\data\binary\podoc_others\_podocitopatia\With'
-  - '..\data\binary\podoc_others\_podocitopatia\With\AZAN'
-  - '..\data\binary\podoc_others\_podocitopatia\With\HE'
-  - '..\data\binary\podoc_others\_podocitopatia\With\PAMS'
-  - '..\data\binary\podoc_others\_podocitopatia\With\PAS'
-  - '..\data\binary\podoc_others\_podocitopatia\With\PICRO'
+wandb_key: '273b6e50d83b95fd3a12d6544e5d48bf5afa49e2'
+wandb_save_checkpoint: True
+patience: 100
+model_name: 'Podocytopathy'
+data_dir: './data/binary/binary_Podocytopathy'
+classes: ['_others', 'Podocytopathy']

@@ -1,7 +1,4 @@
-data/binary
-data/raw
-data/results
-data/test
+data/*
 .vscode
 .pth.tar
 
@@ -16,3 +13,8 @@ wandb/
 
 notebooks/*.jpg
 *.jpg
+
+.venv
+.idea
+local_scripts
+logs

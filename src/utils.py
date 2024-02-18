@@ -1,28 +1,29 @@
 import wandb
-import torch
-import torch.nn.functional as F
 import os
-from PIL import Image
 import pandas as pd
 import numpy as np
-from tqdm import tqdm
-from torchvision import transforms
-from torch.utils.data import WeightedRandomSampler
 import torch
-from tqdm import tqdm
 import torch.nn.functional as F
 import time
+import yaml
+
+from PIL import Image
+from torch.utils.data import WeightedRandomSampler
+from tqdm import tqdm
 from pathlib import Path
 from torch import nn
-import yaml
-from metrics import Metrics
+from typing import Any
+
+from config import settings
+from src.metrics import Metrics
+
 
 def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
     model.train()
     train_loss = 0.0
     train_correct = 0
 
-    for batch_idx, (data, y) in enumerate(loader):
+    for batch_idx, (data, y) in tqdm(enumerate(loader), total=len(loader)):
         data = data.to(device=device)
         y = y.to(device=device)
         targets = F.one_hot(y, num_classes=2)
@@ -41,29 +42,28 @@ def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
 
         train_loss += loss.item() * data.size(0)
 
-        scores = torch.sigmoid(output)
-        predictions = (scores>0.5).float()
-        _, pred = torch.max(predictions, 1)
+        scores = torch.softmax(output, dim=-1)
+        pred = torch.argmax(scores, dim=-1)
         
-        train_correct += (pred == y ).sum()
+        train_correct += (pred == y).sum().item()
 
     return train_loss, train_correct
 
 def valid_epoch(loader, model, loss_fn=None, device="cuda"):
-    num_correct = 0
+    val_correct = 0
     valid_loss = 0.0
     model.eval()
     y_true = []
     y_pred = []
 
     with torch.no_grad():
-        for x, y in loader:
+        for x, y in tqdm(loader, total=len(loader)):
             x = x.to(device=device)
             y = y.to(device=device)
   
             output = model(x)
-            scores = torch.sigmoid(output)
-            predictions = (scores>0.5).float()
+            scores = torch.softmax(output, dim=-1)
+            pred = torch.argmax(scores, dim=-1)
             
             target = F.one_hot(y, num_classes=2)
 
@@ -71,30 +71,31 @@ def valid_epoch(loader, model, loss_fn=None, device="cuda"):
                 loss = loss_fn(output, target.float())
                 valid_loss+=loss.item()*x.size(0)
 
-            _, pred = torch.max(predictions, 1)
-
-            num_correct += (pred == y).sum()
+            val_correct += (pred == y).sum().item()
 
             y_true.extend(y.tolist())
             y_pred.extend(pred.tolist())
 
-
     metrics_result = Metrics()
     metrics_result.compute_metrics(y_true, y_pred)
     
-    return valid_loss, num_correct, metrics_result
+    return valid_loss, val_correct, metrics_result
           
 
 
     
 
-def save_checkpoint(model, optimizer, create_timestamp_folder, metric_type, fold=""):
+def save_checkpoint(model, optimizer, create_timestamp_folder, metric_type, fold="",
+                    log_to_wandb: bool = False, checkpoint_artifact: wandb.Artifact | None = None):
+    if not os.path.exists('./artifacts'):
+        os.mkdir('./artifacts')
     state = {'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}
     Path(f'./artifacts/{create_timestamp_folder}').mkdir(exist_ok=True)
     filename=f"./artifacts/{create_timestamp_folder}/{fold}_fold_{metric_type}_checkpoint.pth.tar"
     # print("Saving checkpoint...")
     torch.save(state, filename)
-
+    if log_to_wandb:
+        checkpoint_artifact.add_file(filename)
 
 
 def load_checkpoint(path, model, optimizer):
@@ -123,8 +124,8 @@ def make_prediction(model, transform, rootdir, device):
     print("Done with predictions")
 
 
-def get_balanced_dataset_sampler(data_loader, train_ids, train_subset):
-    binary_labels = [sample[1] for sample in data_loader.dataset.samples]
+def get_balanced_dataset_sampler(full_dataset, train_ids, train_subset):
+    binary_labels = [sample[1] for sample in full_dataset.samples]
     class_weights = 1 / np.unique(np.array(binary_labels)[train_ids], return_counts=True)[1] 
     sample_weights = [0] * len(train_ids)
     for idx, (data, label) in enumerate(train_subset):
@@ -134,25 +135,6 @@ def get_balanced_dataset_sampler(data_loader, train_ids, train_subset):
         sample_weights, num_samples=len(sample_weights), replacement=True
     )
     return sampler
-
-def get_train_transform():
-    return transforms.Compose([
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(10),
-        transforms.RandomResizedCrop(224),
-        transforms.ColorJitter(
-            brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    ])
-
-def get_test_transform():
-    return transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-    ])
-
 
 
 def create_timestamp_folder(model_name):
@@ -166,12 +148,13 @@ def create_timestamp_folder(model_name):
     return f'{model_name}_{folder_name}'
 
 
-def initialize_wandb(inputs, fold, folder_name):
+def initialize_wandb(inputs: dict[str, Any], fold: int, folder_name: str, **kwargs):
     if inputs['wandb_on']:
         wandb.init(
             name=f'{folder_name}_{fold}', 
-            project=inputs['project'],
-            config=inputs
+            project=inputs['wandb_project'],
+            entity=inputs['wandb_team'],
+            config=inputs | settings.to_dict() | kwargs
             )
 
 
@@ -241,7 +224,8 @@ def load_training_parameters(filename):
         params = yaml.safe_load(file)
     return params
 
-def wandb_log_final_result(metrics:Metrics, config):
+
+def wandb_log_final_result(metrics:Metrics, loss: float, config):
 
     wandb.log({"conf_mat" : wandb.plot.confusion_matrix(probs=None,
                             y_true=metrics.y_true, preds=metrics.y_pred,
@@ -253,11 +237,12 @@ def wandb_log_final_result(metrics:Metrics, config):
     # wandb.log({"ROC" : wandb.plot.roc_curve(metrics.y_true, metrics.y_pred,
     #                         labels=config['classes'])})
 
-    wandb.summary['test_accuracy'] = metrics.accuracy
-    wandb.summary['test_precision'] = metrics.precision
-    wandb.summary['test_recall'] = metrics.recall
-    wandb.summary['test_fscore'] = metrics.fscore
-    wandb.summary['test_kappa'] = metrics.kappa
+    wandb.summary['val_loss'] = loss
+    wandb.summary['val_accuracy'] = metrics.accuracy
+    wandb.summary['val_precision'] = metrics.precision
+    wandb.summary['val_recall'] = metrics.recall
+    wandb.summary['val_fscore'] = metrics.fscore
+    wandb.summary['val_kappa'] = metrics.kappa
     # wandb.log({
     #     'final_accuracy': metrics.accuracy,
     #     'final_precision': metrics.precision,

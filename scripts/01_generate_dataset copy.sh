@@ -1,1 +1,0 @@
-python ./data/01_generate_dataset.py
