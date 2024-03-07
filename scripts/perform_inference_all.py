@@ -30,6 +30,13 @@ def setup_argparse() -> argparse.ArgumentParser:
     parser.add_argument("--mode", type=str, default="min_loss")
     parser.add_argument("--best_model_dir", type=str, default="")
     parser.add_argument("--overwrite_best_model_dir", action="store_true", default=False)
+    parser.add_argument("--mcd", "--num_samples_mc_dropout", 
+                        help="Number of times to run inference for a single dataset sample" 
+                        "(in the way given the Monte Carlo dropout/MCD method). Default = 1 (no MCD)",
+                        type=int, default=1)
+    parser.add_argument("--dropout", help="Probability of dropout on inference (between 0.0 and 1.0)."
+                        "Assumes Monte Carlo dropout method. Default = 0 (no dropout)",
+                        type=float, default=0)
     return parser
 
 
@@ -97,7 +104,9 @@ def main():
                                              config_file_path=config_file,
                                              test_data_dir=os.path.join(args.test_dataset_root, f"binary_{class_name}"),
                                              verbose=args.verbose,
-                                             device=args.device)
+                                             device=args.device,
+                                             p_dropout=args.dropout,
+                                             num_samples_mc_dropout=args.mcd)
             test_losses.append(loss)
             test_metrics.append(metrics_obj)
 

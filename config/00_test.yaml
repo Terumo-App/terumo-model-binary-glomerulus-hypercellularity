@@ -1,6 +1,6 @@
 wandb_project: 'debugging'
 wandb_team: 'terumo-binary'
-n_folds: 5
+n_folds: 1
 seed: 42
 num_workers: 0
 batch_size: 64

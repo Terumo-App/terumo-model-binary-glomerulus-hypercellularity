@@ -49,19 +49,60 @@ def train_epoch(loader, model, optimizer, loss_fn, scaler, device):
 
     return train_loss, train_correct
 
-def valid_epoch(loader, model, loss_fn=None, device="cuda"):
+def bayesian_forward_pass(model, x: torch.Tensor, device: str, monte_carlo_runs: int = 1) -> tuple[torch.Tensor, torch.Tensor]:
+    with torch.no_grad():
+        if monte_carlo_runs < 1:
+            raise ValueError(f"Invalid value for number of Monte Carlo samples: {monte_carlo_runs}"
+                             " (must be greater than or equal to 1)")
+        elif monte_carlo_runs == 1:
+            # var[b] = (1/runs) * sum_k y_hat_batch[b][k]^T * y_hat_batch[b][k] - output[b]^T * output[b]
+            # since runs == 1 and y_hat_batch[b][0] would be just output[b], we know var = 0
+            output = model(x)
+            var = torch.zeros((output.shape[-2], output.shape[-1], output.shape[-1]), device=device)
+            return output, var
+
+        # estimates: (T, batch_size, C)
+        estimates = torch.stack([model(x) for i in range(monte_carlo_runs)]).to(device)
+        batch_size = estimates.shape[-2]
+        num_classes = estimates.shape[-1]
+        if len(estimates.shape) != 3:
+            raise RuntimeError(f"Unexpected error for matrix of stochastic entries: {estimates.shape}, expected (T, batch_size, num_classes)")
+        # output: (batch_size, C)
+        output = torch.mean(estimates, dim=0)
+        # the precision term (tau) from https://arxiv.org/pdf/1506.02142.pdf is 0 since we don't have L2 regularization or weight decay
+
+        # y_hat_list: (batch_size, T, C)
+        # now each slice of y_hat_list on dim 0 has the T estimates for that single given sample
+        y_hat_batch = estimates.moveaxis(1, 0)
+
+        # var: (batch_size, C, C)
+        # var[b] = (1/runs) sum_k y_hat_batch[b][k]^T y_hat_batch[b][k] - output[b]^T * output[b]
+        var = torch.zeros((batch_size, num_classes, num_classes), device=device)
+        for b, y_hat_samples in enumerate(y_hat_batch):
+            # y_hat_samples: (T, C), y_hat_samples = y_hat_batch[b]
+            # var[b] = (1/runs) sum_k y_hat_samples[k]^T * y_hat_samples[k]
+            for y_hat in y_hat_samples:
+                var[b] = var[b] + (1 / monte_carlo_runs) * torch.outer(y_hat, y_hat)
+            var[b] = var[b] - torch.outer(output[b], output[b])
+        return output, var
+
+def valid_epoch(loader, model, loss_fn=None, device="cuda",
+                monte_carlo_runs: int = 1):
     val_correct = 0
     valid_loss = 0.0
     model.eval()
     y_true = []
     y_pred = []
+    pred_var = []
 
     with torch.no_grad():
         for x, y in tqdm(loader, total=len(loader)):
             x = x.to(device=device)
             y = y.to(device=device)
-  
-            output = model(x)
+            
+            output, var = bayesian_forward_pass(model, x, device, monte_carlo_runs)
+            pred_var.append(var)
+            
             scores = torch.softmax(output, dim=-1)
             pred = torch.argmax(scores, dim=-1)
             
@@ -79,10 +120,11 @@ def valid_epoch(loader, model, loss_fn=None, device="cuda"):
     metrics_result = Metrics()
     metrics_result.compute_metrics(y_true, y_pred)
     
-    return valid_loss, val_correct, metrics_result
-          
-
-
+    if monte_carlo_runs > 1:
+        return valid_loss, val_correct, metrics_result, torch.concat(pred_var, dim=0)
+    else:
+        # ignores variance matrix since no sampling was done
+        return valid_loss, val_correct, metrics_result
     
 
 def save_checkpoint(model, optimizer, create_timestamp_folder, metric_type, fold="",

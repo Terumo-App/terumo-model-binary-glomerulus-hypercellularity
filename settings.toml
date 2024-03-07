@@ -63,6 +63,7 @@ p_shift = 0.5
 
 net_version = "b0"
 fcLayer = 1280
+dropout = 0.5
 
 [config]
 
