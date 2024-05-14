@@ -91,6 +91,7 @@ def evaluate_scores(img: torch.Tensor, models_directory: str) -> dict[str, float
         # efficient net expects a 4D input (batch_size, channels, H, W)
         logit = binary_classifier(img.unsqueeze(dim=0))
         scores = torch.softmax(logit, dim=-1).squeeze(dim=0)
+        # the first is the probability of being positive
         print(f"Score/probability of being class {cls}: {scores[0]}")
         
 

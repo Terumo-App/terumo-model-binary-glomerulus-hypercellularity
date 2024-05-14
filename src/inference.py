@@ -16,7 +16,6 @@ from src.transforms import get_test_transform
 
 def setup_argparser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_file", type=str)
     parser.add_argument("--checkpoint", type=str)
     parser.add_argument("--test_dataset", type=str)
     parser.add_argument("--device", type=str, default="cpu")
@@ -29,7 +28,7 @@ def setup_model(checkpoint_path: str, device: str, **opt_params) -> tuple[Net, t
     opt = torch.optim.Adam(model.parameters(), **opt_params)
     load_checkpoint(checkpoint_path, model, opt)
     model = model.to(device)
-    return model, opt
+    return model
 
 
 def log_inference(loss: float, metrics: Metrics, total_samples: int) -> None:
@@ -42,12 +41,10 @@ def log_inference(loss: float, metrics: Metrics, total_samples: int) -> None:
 
 
 def inference(checkpoint_path: str,
-              config_file_path: str,
               test_data_dir: str,
               device: str = "cpu",
               verbose: bool = True) -> tuple[float, int, Metrics]:
-    run_params = load_training_parameters(config_file_path)
-    model, opt = setup_model(checkpoint_path, device, lr=run_params["learning_rate"])
+    model = setup_model(checkpoint_path, device)
 
     def in_the_wild_loader(path: str) -> np.ndarray:
         rgb_image = Image.open(path).convert("RGB")
@@ -58,7 +55,7 @@ def inference(checkpoint_path: str,
                                        target_transform=lambda index: index,
                                        loader=in_the_wild_loader)
     test_dataloader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                                  batch_size=run_params["batch_size"],
+                                                  batch_size=100,
                                                   shuffle=False,
                                                   num_workers=0)
     loss_fn = torch.nn.CrossEntropyLoss(reduction="mean")
@@ -77,4 +74,4 @@ def inference(checkpoint_path: str,
 if __name__ == "__main__":
     parser = setup_argparser()
     args = parser.parse_args()
-    inference(args.checkpoint, args.config_file, args.test_dataset, args.device, args.verbose)
+    inference(args.checkpoint, args.test_dataset, args.device, args.verbose)

@@ -11,15 +11,6 @@ from config import settings
 from src.metrics import Metrics
 from src.inference import inference
 
-CONFIG_FILES_MAPPING = {
-    "Hypercellularity": "config/01_hipercel.yaml",
-    "Membranous": "config/02_membra.yaml",
-    "Sclerosis": "config/03_sclerosis.yaml",
-    "Normal": "config/04_normal.yaml",
-    "Podocytopathy": "config/05_podoc.yaml",
-    "Crescent": "config/06_cresce.yaml",
-}
-
 
 def setup_argparse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
@@ -82,22 +73,21 @@ def main():
 
     # inference for each class
     for class_name in settings.data_processing.class_names:
-        config_file = CONFIG_FILES_MAPPING[class_name]
         checkpoint_files = generate_checkpoint_files(class_name, search_dir=args.checkpoint_dir, mode=args.mode)
         test_losses: list[float] = []
         test_metrics: list[Metrics] = []
 
         print(f" {class_name} binary classifier ".center(80, '-'))
-        print("Using config file: ", config_file)
 
         for checkpoint in checkpoint_files:
             if args.verbose:
                 print(f"\nFold from checkpoint file '{checkpoint}'", end=2*'\n')
-            loss, _, metrics_obj = inference(checkpoint_path=checkpoint,
-                                             config_file_path=config_file,
-                                             test_data_dir=os.path.join(args.test_dataset_root, f"binary_{class_name}"),
-                                             verbose=args.verbose,
-                                             device=args.device)
+            loss, _, metrics_obj = inference(
+                checkpoint_path=checkpoint,
+                test_data_dir=os.path.join(args.test_dataset_root, f"binary_{class_name}"),
+                verbose=args.verbose,
+                device=args.device
+            )
             test_losses.append(loss)
             test_metrics.append(metrics_obj)
 
