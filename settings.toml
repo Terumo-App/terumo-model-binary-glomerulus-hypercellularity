@@ -1,0 +1,69 @@
+[data_processing]
+
+class_names = ['Hypercellularity', 'Normal', 'Membranous', 'Sclerosis', 'Crescent', 'Podocytopathy']
+data_folder = "./data"
+allowed_img_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff']
+raw_data_folder = "raw"
+
+[image]
+
+img_size = [224, 224]
+resize_mode = "zero_padding"
+mean = [0.5, 0.5, 0.5]
+std = [0.5, 0.5, 0.5]
+
+[augmentation]
+
+p_horizontal_flip = 0.5
+p_vertical_flip = 0.5
+max_rotation_angle = 30
+p_rotation = 0.4
+
+[augmentation.color]
+
+brightness_factor = 0.4
+contrast_factor = 0.4
+saturation_factor = 0.4
+hue_factor = 0.1
+p_color_jitter = 0.4
+
+[augmentation.noise]
+
+gauss_noise_var_range = [5.0, 30.0]
+gauss_noise_mean = 0.0
+p_gauss_noise = 0.4
+gauss_blur_limit = [3, 7] # the default for the albumentations transform
+p_gauss_blur = 0.4
+
+[augmentation.coarse_dropout]
+
+max_holes = 2
+max_h = 56
+max_w = 56
+min_holes = 1
+min_h = 14
+min_w = 14
+p_coarse_dropout = 0.2 # this transform is really strong, should not happen too often
+
+[augmentation.distortion]
+
+p_optical_distortion = 0.4
+p_grid_distortion = 0.1
+p_piecewise_affine = 0.4
+p_distortion = 0.3
+
+[augmentation.shift]
+
+shift_limit = 0.0625
+scale_limit = [-0.2, 0.2]
+rotate_limit = [-30, 30]
+p_shift = 0.5
+
+[model]
+
+net_version = "b0"
+fcLayer = 1280
+
+[config]
+
+device = "cuda"
