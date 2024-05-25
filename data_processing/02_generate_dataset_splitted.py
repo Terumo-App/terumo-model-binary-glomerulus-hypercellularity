@@ -1,11 +1,23 @@
 import random
-from pathlib import Path
-from typing import List
+import os
 import re
 import json
 
+from typing import List
+from pathlib import Path
+
 
 def generate_data_folders(dataset_name: str, data_folder: str = './data', raw_data_folder: str = 'raw'):
+    """
+        Creates the following directory structure
+
+        data_folder
+            raw_data_folder
+            processed
+                dataset_name
+                    train
+                    val
+    """
 
     data_dir = Path(data_folder)
     raw_dir = data_dir / raw_data_folder
@@ -23,25 +35,33 @@ def generate_data_folders(dataset_name: str, data_folder: str = './data', raw_da
 
 
 def generate_binary_dataset(dataset_name: str, class_list: List[str], data_folder: str = './data', val_split: int = 0.2):
+    target_class = dataset_name
+
     def format_path(file_path):
-            folders_splitted = re.split(r'\\|/', str(file_path))
-            path_suffix = "/".join(folders_splitted[2:])
-            return path_suffix
+        folders_splitted = re.split(r'\\|/', str(file_path))
+        path_suffix = "/".join(folders_splitted[2:])
+        return path_suffix
     
     def get_all_image_files(pathlib_root_folder):
-            img_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.gif']
-            img_regex = re.compile('|'.join(img_extensions), re.IGNORECASE)
-            image_files = [f for f in pathlib_root_folder.glob('**/*') if f.is_file() and img_regex.search(f.suffix)]
-            return image_files
-    
+        img_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff']
+        img_regex = re.compile('|'.join(img_extensions), re.IGNORECASE)
+        image_files = [f for f in pathlib_root_folder.glob('**/*') if f.is_file() and img_regex.search(f.suffix)]
+        return image_files
 
     raw_data_dir, train_dir, val_dir = generate_data_folders(dataset_name, data_folder=data_folder)
 
-    print("#"*60)
-    for cls in class_list:
+    print(f" Creating dataset for binary classification of target class: {target_class} ".center(80, "#"))
+    for collection_name in os.listdir(raw_data_dir):
 
-        class_dir = raw_data_dir / cls
-        files = get_all_image_files(class_dir)
+        cls = ""
+        for c in class_list:
+            if (c in collection_name):
+                cls = c
+                break
+        else:
+            raise ValueError(f"Unknown/invalid classname for collection {collection_name}")
+
+        files = get_all_image_files(raw_data_dir / collection_name)
 
         random.seed(10)
         random.shuffle(files)
@@ -57,18 +77,22 @@ def generate_binary_dataset(dataset_name: str, class_list: List[str], data_folde
         f_train = []
         f_test = []
         for f in files[val_size:]:
-
-            dst = train_dir / format_path(f)
+            if (cls == target_class):
+                dst = train_dir / target_class / format_path(f)
+            else:
+                dst = train_dir / "others" / format_path(f)     
             dst.parent.mkdir(parents=True, exist_ok=True)
             dst.write_bytes(f.read_bytes())
             f_train.append(str(f))
 
         for f in files[:val_size]:
-            dst = val_dir / format_path(f)
+            if (cls == target_class):
+                dst = val_dir / target_class / format_path(f)
+            else:
+                dst = val_dir / "others" / format_path(f)
             dst.parent.mkdir(parents=True, exist_ok=True)
             dst.write_bytes(f.read_bytes())
             f_test.append(str(f))
-        
         
         with open(f'{str(train_dir)}_{cls}_dataset.json', 'w') as f:
             json.dump({"images":f_train}, f)
@@ -76,17 +100,9 @@ def generate_binary_dataset(dataset_name: str, class_list: List[str], data_folde
         with open(f'{str(val_dir)}_{cls}_dataset.json', 'w') as f:
             json.dump({"images":f_test}, f)
 
-
-
-
 if __name__ == "__main__":
     data_folder = './data'
-    dataset_names = ['hiper_normal', 'memb_normal', 'scler_normal']
-    classes_lists = [
-         ['hipercellularity', 'normal'],
-         ['membranous', 'normal'],
-         ['sclerosis', 'normal']
-         ]
+    classes_lists = ['Hypercelularidade', 'Membranous', 'Sclerosis', 'Normal', 'Crescent', 'Podocitopatia']
 
-    for dataset_name, classes_list in zip(dataset_names, classes_lists):
-        generate_binary_dataset(dataset_name, classes_list, data_folder=data_folder)
+    for dataset_name in classes_lists:
+        generate_binary_dataset(dataset_name, classes_lists, data_folder=data_folder)
