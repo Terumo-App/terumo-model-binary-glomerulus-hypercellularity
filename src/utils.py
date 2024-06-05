@@ -227,9 +227,9 @@ def load_training_parameters(filename):
 
 def wandb_log_final_result(metrics:Metrics, loss: float, config):
 
-    wandb.log({"conf_mat" : wandb.plot.confusion_matrix(probs=None,
-                            y_true=metrics.y_true, preds=metrics.y_pred,
-                            class_names=config['classes'])})
+    # wandb.log({"conf_mat" : wandb.plot.confusion_matrix(probs=None,
+    #                         y_true=metrics.y_true, preds=metrics.y_pred,
+    #                         class_names=config['classes'])})
     
     # wandb.log({"pr" : wandb.plot.pr_curve(metrics.y_true, metrics.y_pred,
     #             labels=None, classes_to_plot=None)})

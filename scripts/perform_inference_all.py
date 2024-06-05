@@ -4,6 +4,7 @@ import datetime
 import os
 import re
 import shutil
+import time
 
 import numpy as np
 
@@ -55,9 +56,11 @@ def save_best_checkpoint(best_model_dir: str,
                              f"{len(checkpoint_files)} and {len(test_metrics)}")
     idx: int = np.argmax([getattr(t, watch_metric) for t in test_metrics])
     checkpoint_basename: str = os.path.basename(checkpoint_files[idx])
-    checkpoint_basename = "-".join([class_name, str(datetime.datetime.now()), checkpoint_basename])
+    current_time = time.localtime()
+    folder_name = time.strftime('%Y-%m-%d-%H-%M-%S', current_time)
+    checkpoint_basename = "-".join([class_name, folder_name, checkpoint_basename])
     print(f"Best checkpoint for class {class_name} was {checkpoint_files[idx]}. Copying to {best_model_dir}...")
-    shutil.copy(checkpoint_files[idx], os.path.join(best_model_dir, checkpoint_basename))
+    shutil.copy(checkpoint_files[idx], os.path.join(best_model_dir, checkpoint_basename).replace("\\","/"))
 
 
 def main():

@@ -2,7 +2,7 @@ wandb_project: 'podocytopathy'
 wandb_team: 'terumo-binary'
 n_folds: 5
 seed: 42
-num_workers: 4
+num_workers: 0
 batch_size: 64
 pin_memory: True
 load_model: False

@@ -1,7 +1,8 @@
 data/*
 .vscode
 .pth.tar
-
+/.venv/*
+venv/*
 __pycache__
 artifacts/
 wandb/
@@ -10,7 +11,7 @@ wandb/
 
 *.zip
 
-
+*.tar
 notebooks/*.jpg
 *.jpg
 

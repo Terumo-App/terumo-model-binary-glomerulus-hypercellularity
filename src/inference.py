@@ -44,6 +44,7 @@ def inference(checkpoint_path: str,
               test_data_dir: str,
               device: str = "cpu",
               verbose: bool = True) -> tuple[float, int, Metrics]:
+    print(checkpoint_path)
     model = setup_model(checkpoint_path, device)
 
     def in_the_wild_loader(path: str) -> np.ndarray:
