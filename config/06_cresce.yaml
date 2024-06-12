@@ -3,7 +3,7 @@ wandb_team: 'terumo-binary'
 n_folds: 5
 seed: 42
 num_workers: 4
-batch_size: 64
+batch_size: 48
 pin_memory: True
 load_model: False
 checkpoint_to_be_loaded: './artifacts/model/my_checkpoint.pth.tar'
