@@ -1,6 +1,6 @@
 [data_processing]
 
-class_names = ['Hypercellularity', 'Normal', 'Membranous', 'Sclerosis', 'Crescent', 'Podocytopathy']
+class_names = ['0_N', '1_PB', '2_UDH', '3_FEA', '4_ADH', '5_DCIS', '6_IC']
 data_folder = "./data"
 allowed_img_extensions = ['.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff']
 raw_data_folder = "raw"

@@ -1,11 +1,12 @@
 import argparse
 import datetime
-
+import collections
 import os
 import re
 import shutil
 
 import numpy as np
+import pandas as pd
 
 from config import settings
 from src.metrics import Metrics
@@ -71,12 +72,14 @@ def main():
             shutil.rmtree(args.best_model_dir)
         os.makedirs(args.best_model_dir, exist_ok=True)
 
+    metrics_result = collections.defaultdict(list)
     # inference for each class
     for class_name in settings.data_processing.class_names:
         checkpoint_files = generate_checkpoint_files(class_name, search_dir=args.checkpoint_dir, mode=args.mode)
         test_losses: list[float] = []
         test_metrics: list[Metrics] = []
-
+        
+        metrics_result["class_name"].append(class_name)
         print(f" {class_name} binary classifier ".center(80, '-'))
 
         for checkpoint in checkpoint_files:
@@ -95,11 +98,15 @@ def main():
                          if isinstance(getattr(test_metrics[0], key), float)]
         print(f"test/loss (mean): {np.mean(test_losses)}")
         print(f"test/loss (std): {np.std(test_losses)}")
+        
         for m_name in metrics_names:
             mean = np.mean([getattr(t, m_name) for t in test_metrics])
             std = np.std([getattr(t, m_name) for t in test_metrics])
             print(f"test/{m_name} (mean): {mean}")
             print(f"test/{m_name} (std): {std}")
+            metrics_result[m_name].append(mean)
+            metrics_result[m_name + "_std"].append(std)
+
 
         if args.best_model_dir:  # != ""
             save_best_checkpoint(args.best_model_dir,
@@ -108,6 +115,8 @@ def main():
                                  test_metrics,
                                  watch_metric="fscore")
 
+    df = pd.DataFrame(metrics_result)
+    df.to_excel(f"./logs/metrics-{args.mode}-{str(datetime.datetime.now())}.xlsx", index=False)
 
 if __name__ == '__main__':
     main()

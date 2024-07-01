@@ -108,7 +108,7 @@ def main():
         model = Net(net_version=settings.model.net_version, num_classes=2, freeze=PARAMS["freeze"]).to(settings.config.DEVICE)
         optimizer = optim.Adam(model.parameters(), lr=PARAMS['learning_rate'])
         scaler = torch.cuda.amp.GradScaler()
-        set_gpu_mode(model)
+        # set_gpu_mode(model)
 
         if PARAMS['load_model']:
             load_checkpoint(torch.load(PARAMS['checkpoint_to_be_loaded']), model, optimizer)
